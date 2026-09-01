@@ -29,14 +29,50 @@ import '../widgets/main_shell.dart';
 import '../services/cloud_profile_bootstrap.dart';
 import '../../features/plans/providers/meal_preferences_provider.dart';
 import 'app_page_transitions.dart';
+import 'router_refresh_notifier.dart';
+
+String? _resolve_redirect({
+  required AuthStatus authState,
+  required MealPreferencesState meal_prefs,
+  required String location,
+}) {
+  final is_loading = authState == AuthStatus.loading;
+  final is_authed = authState == AuthStatus.authenticated;
+  final is_auth_route = location == '/login' ||
+      location == '/signup' ||
+      location == '/forgot-password';
+  final is_onboarding = location == '/onboarding';
+  final is_splash = location == '/splash';
+  final prefs_ready = meal_prefs.is_ready;
+  final needs_onboarding =
+      is_authed && prefs_ready && !meal_prefs.has_completed_setup;
+
+  if (is_loading) return '/splash';
+
+  if (is_splash) {
+    if (!is_authed) return '/signup';
+    if (!prefs_ready) return null;
+    return needs_onboarding ? '/onboarding' : '/home';
+  }
+
+  if (is_authed && !prefs_ready) return '/splash';
+  if (is_authed && needs_onboarding && !is_onboarding) return '/onboarding';
+  if (is_authed && !needs_onboarding && is_onboarding) return '/home';
+  if (is_authed && is_auth_route) {
+    return needs_onboarding ? '/onboarding' : '/home';
+  }
+  if (!is_authed && !is_auth_route && !is_splash) return '/signup';
+
+  return null;
+}
 
 final routerProvider = Provider<GoRouter>((ref) {
   ref.watch(cloudProfileBootstrapProvider);
-  final authState = ref.watch(authProvider);
-  final meal_prefs = ref.watch(mealPreferencesProvider);
+  final refresh = ref.watch(routerRefreshProvider);
 
   return GoRouter(
     initialLocation: '/splash',
+    refreshListenable: refresh,
     errorBuilder: (context, state) {
       return AppErrorScreen(
         kind: AppErrorKind.notFound,
@@ -47,28 +83,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       );
     },
     redirect: (context, state) {
-      final isLoading = authState == AuthStatus.loading;
-      final isAuthed = authState == AuthStatus.authenticated;
-      final location = state.matchedLocation;
-      final isAuthRoute = location == '/login' ||
-          location == '/signup' ||
-          location == '/forgot-password';
-      final isOnboarding = location == '/onboarding';
-      final isSplash = location == '/splash';
-      final prefs_ready = meal_prefs.is_ready;
-      final needs_onboarding =
-          isAuthed && prefs_ready && !meal_prefs.has_completed_setup;
-
-      if (isLoading) return '/splash';
-      if (isAuthed && !prefs_ready && !isSplash) return '/splash';
-      if (isAuthed && needs_onboarding && !isOnboarding) return '/onboarding';
-      if (isAuthed && !needs_onboarding && isOnboarding) return '/home';
-      if (isAuthed && isAuthRoute) {
-        return needs_onboarding ? '/onboarding' : '/home';
-      }
-      if (!isAuthed && !isAuthRoute && !isSplash) return '/signup';
-
-      return null;
+      return _resolve_redirect(
+        authState: ref.read(authProvider),
+        meal_prefs: ref.read(mealPreferencesProvider),
+        location: state.matchedLocation,
+      );
     },
     routes: [
       GoRoute(

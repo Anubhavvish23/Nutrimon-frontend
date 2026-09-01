@@ -397,18 +397,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
       children: [
         Row(
           children: [
-            Container(
-              width: 28,
-              height: 28,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: app.border),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(7),
-                child: const AppLogo(size: 28),
-              ),
-            ),
+            const AppLogo(size: 28),
             const SizedBox(width: 8),
             Text(
               AppBrand.name,

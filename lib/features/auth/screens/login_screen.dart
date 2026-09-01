@@ -119,24 +119,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
               Row(
                 children: [
-                  Container(
-                    width: 52,
-                    height: 52,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: app.glow,
-                          blurRadius: 20,
-                          spreadRadius: 2,
-                        ),
-                      ],
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(16),
-                      child: const AppLogo(size: 52),
-                    ),
-                  ),
+                  const AppLogo(size: 52),
                   const SizedBox(width: 14),
                   Expanded(
                     child: Column(

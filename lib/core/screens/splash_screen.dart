@@ -16,7 +16,6 @@ class _SplashScreenState extends State<SplashScreen>
   late final AnimationController _text_controller;
 
   late final Animation<double> _logo_scale;
-  late final Animation<double> _logo_rotation;
   late final Animation<double> _pulse;
   late final Animation<double> _text_opacity;
   late final Animation<Offset> _text_slide;
@@ -27,13 +26,10 @@ class _SplashScreenState extends State<SplashScreen>
 
     _logo_controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 900),
+      duration: const Duration(milliseconds: 700),
     );
-    _logo_scale = Tween<double>(begin: 0.55, end: 1.0).animate(
+    _logo_scale = Tween<double>(begin: 0.7, end: 1.0).animate(
       CurvedAnimation(parent: _logo_controller, curve: Curves.easeOutBack),
-    );
-    _logo_rotation = Tween<double>(begin: -0.08, end: 0.0).animate(
-      CurvedAnimation(parent: _logo_controller, curve: Curves.easeOutCubic),
     );
 
     _pulse_controller = AnimationController(
@@ -46,20 +42,20 @@ class _SplashScreenState extends State<SplashScreen>
 
     _text_controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 500),
+      duration: const Duration(milliseconds: 450),
     );
     _text_opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _text_controller, curve: Curves.easeOut),
     );
     _text_slide = Tween<Offset>(
-      begin: const Offset(0, 0.25),
+      begin: const Offset(0, 0.2),
       end: Offset.zero,
     ).animate(
       CurvedAnimation(parent: _text_controller, curve: Curves.easeOutCubic),
     );
 
     _logo_controller.forward();
-    Future.delayed(const Duration(milliseconds: 350), () {
+    Future.delayed(const Duration(milliseconds: 280), () {
       if (mounted) _text_controller.forward();
     });
   }
@@ -91,21 +87,18 @@ class _SplashScreenState extends State<SplashScreen>
                     boxShadow: [
                       BoxShadow(
                         color: const Color(0xFF1DB954)
-                            .withValues(alpha: _pulse.value * 0.55),
-                        blurRadius: 36 + (_pulse.value * 12),
-                        spreadRadius: 6 + (_pulse.value * 8),
+                            .withValues(alpha: _pulse.value * 0.5),
+                        blurRadius: 32 + (_pulse.value * 10),
+                        spreadRadius: 4 + (_pulse.value * 6),
                       ),
                     ],
                   ),
                   child: child,
                 );
               },
-              child: RotationTransition(
-                turns: _logo_rotation,
-                child: ScaleTransition(
-                  scale: _logo_scale,
-                  child: const AppLogo(size: 112),
-                ),
+              child: ScaleTransition(
+                scale: _logo_scale,
+                child: const AppLogo(size: 96),
               ),
             ),
             const SizedBox(height: 28),
@@ -137,12 +130,12 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
               ),
             ),
-            const SizedBox(height: 56),
+            const SizedBox(height: 48),
             FadeTransition(
               opacity: _text_opacity,
               child: SizedBox(
-                width: 28,
-                height: 28,
+                width: 26,
+                height: 26,
                 child: CircularProgressIndicator(
                   strokeWidth: 2.5,
                   color: const Color(0xFF1DB954).withValues(alpha: 0.85),

@@ -48,7 +48,6 @@ dependencies:
   url_launcher: ^6.3.2
   connectivity_plus: ^6.1.4
   google_fonts: ^6.2.1
-  flutter_svg: ^2.0.17
 
 dev_dependencies:
   flutter_test:
@@ -94,7 +93,6 @@ flutter:
 
   assets:
     - assets/icon/icon.png
-    - assets/icon/Nutrimon.svg
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

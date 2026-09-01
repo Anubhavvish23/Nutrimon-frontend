@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'core/config/app_brand.dart';
 import 'core/config/api_config.dart';
 import 'core/providers/theme_mode_provider.dart';
@@ -8,7 +9,7 @@ import 'core/services/app_startup.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/connectivity_gate.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   assert(() {
@@ -16,6 +17,7 @@ void main() {
     return true;
   }());
 
+  await SharedPreferences.getInstance();
   AppStartup.begin();
 
   runApp(

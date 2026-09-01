@@ -148,23 +148,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Container(
-            width: 100,
-            height: 100,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF1DB954).withOpacity(0.35),
-                  blurRadius: 40,
-                  spreadRadius: 8,
-                ),
-              ],
-            ),
-            child: ClipOval(
-              child: const AppLogo(size: 120),
-            ),
-          ),
+          const AppLogo(size: 100),
           const SizedBox(height: 32),
           Text(
             'Welcome to ${AppBrand.name}',

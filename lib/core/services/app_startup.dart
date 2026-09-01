@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'notification_service.dart';
 
 class AppStartup {
@@ -19,11 +18,8 @@ class AppStartup {
 
   static Future<void> _run() async {
     try {
-      await Future.wait([
-        Firebase.initializeApp(),
-        GoogleFonts.pendingFonts([GoogleFonts.plusJakartaSans()]),
-      ]);
-      await NotificationService.initialize();
+      await Firebase.initializeApp();
+      unawaited(NotificationService.initialize());
     } catch (e) {
       debugPrint('App startup init failed: $e');
     } finally {
