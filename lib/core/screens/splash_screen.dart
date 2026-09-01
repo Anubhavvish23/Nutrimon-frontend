@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../config/app_brand.dart';
+import '../widgets/app_logo.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -10,87 +11,71 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen>
     with TickerProviderStateMixin {
-  late AnimationController _scale_controller;
-  late AnimationController _glow_controller;
-  late AnimationController _text_controller;
-  late AnimationController _tagline_controller;
+  late final AnimationController _logo_controller;
+  late final AnimationController _pulse_controller;
+  late final AnimationController _text_controller;
 
-  late Animation<double> _scale_animation;
-  late Animation<double> _glow_animation;
-  late Animation<double> _text_opacity;
-  late Animation<double> _tagline_opacity;
-  late Animation<Offset> _tagline_slide;
+  late final Animation<double> _logo_scale;
+  late final Animation<double> _logo_rotation;
+  late final Animation<double> _pulse;
+  late final Animation<double> _text_opacity;
+  late final Animation<Offset> _text_slide;
 
   @override
   void initState() {
     super.initState();
 
-    _scale_controller = AnimationController(
+    _logo_controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 800),
+      duration: const Duration(milliseconds: 900),
     );
-    _scale_animation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _scale_controller, curve: Curves.elasticOut),
+    _logo_scale = Tween<double>(begin: 0.55, end: 1.0).animate(
+      CurvedAnimation(parent: _logo_controller, curve: Curves.easeOutBack),
+    );
+    _logo_rotation = Tween<double>(begin: -0.08, end: 0.0).animate(
+      CurvedAnimation(parent: _logo_controller, curve: Curves.easeOutCubic),
     );
 
-    _glow_controller = AnimationController(
+    _pulse_controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1500),
+      duration: const Duration(milliseconds: 1400),
     )..repeat(reverse: true);
-    _glow_animation = Tween<double>(begin: 0.3, end: 1.0).animate(
-      CurvedAnimation(parent: _glow_controller, curve: Curves.easeInOut),
+    _pulse = Tween<double>(begin: 0.35, end: 1.0).animate(
+      CurvedAnimation(parent: _pulse_controller, curve: Curves.easeInOut),
     );
 
     _text_controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 600),
-    );
-    _text_opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _text_controller, curve: Curves.easeIn),
-    );
-
-    _tagline_controller = AnimationController(
-      vsync: this,
       duration: const Duration(milliseconds: 500),
     );
-    _tagline_opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _tagline_controller, curve: Curves.easeIn),
+    _text_opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _text_controller, curve: Curves.easeOut),
     );
-    _tagline_slide = Tween<Offset>(
-      begin: const Offset(0, 0.5),
+    _text_slide = Tween<Offset>(
+      begin: const Offset(0, 0.25),
       end: Offset.zero,
     ).animate(
-      CurvedAnimation(parent: _tagline_controller, curve: Curves.easeOut),
+      CurvedAnimation(parent: _text_controller, curve: Curves.easeOutCubic),
     );
 
-    _startAnimations();
-  }
-
-  Future<void> _startAnimations() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    if (!mounted) return;
-    _scale_controller.forward();
-
-    await Future.delayed(const Duration(milliseconds: 600));
-    if (!mounted) return;
-    _text_controller.forward();
-
-    await Future.delayed(const Duration(milliseconds: 400));
-    if (!mounted) return;
-    _tagline_controller.forward();
+    _logo_controller.forward();
+    Future.delayed(const Duration(milliseconds: 350), () {
+      if (mounted) _text_controller.forward();
+    });
   }
 
   @override
   void dispose() {
-    _scale_controller.dispose();
-    _glow_controller.dispose();
+    _logo_controller.dispose();
+    _pulse_controller.dispose();
     _text_controller.dispose();
-    _tagline_controller.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final on_surface = Theme.of(context).colorScheme.onSurface;
+
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Center(
@@ -98,7 +83,7 @@ class _SplashScreenState extends State<SplashScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             AnimatedBuilder(
-              animation: _glow_animation,
+              animation: _pulse,
               builder: (context, child) {
                 return Container(
                   decoration: BoxDecoration(
@@ -106,94 +91,67 @@ class _SplashScreenState extends State<SplashScreen>
                     boxShadow: [
                       BoxShadow(
                         color: const Color(0xFF1DB954)
-                            .withOpacity(_glow_animation.value * 0.6),
-                        blurRadius: 40,
-                        spreadRadius: 10,
-                      ),
-                      BoxShadow(
-                        color: const Color(0xFF1DB954)
-                            .withOpacity(_glow_animation.value * 0.3),
-                        blurRadius: 80,
-                        spreadRadius: 20,
+                            .withValues(alpha: _pulse.value * 0.55),
+                        blurRadius: 36 + (_pulse.value * 12),
+                        spreadRadius: 6 + (_pulse.value * 8),
                       ),
                     ],
                   ),
                   child: child,
                 );
               },
-              child: ScaleTransition(
-                scale: _scale_animation,
-                child: Image.asset(
-                  'assets/icon/icon.png',
-                  width: 120,
-                  height: 120,
-                  errorBuilder: (context, error, stack_trace) {
-                    return const Text('🌿', style: TextStyle(fontSize: 80));
-                  },
+              child: RotationTransition(
+                turns: _logo_rotation,
+                child: ScaleTransition(
+                  scale: _logo_scale,
+                  child: const AppLogo(size: 112),
                 ),
               ),
             ),
             const SizedBox(height: 28),
+            SlideTransition(
+              position: _text_slide,
+              child: FadeTransition(
+                opacity: _text_opacity,
+                child: Column(
+                  children: [
+                    Text(
+                      AppBrand.name,
+                      style: TextStyle(
+                        color: on_surface,
+                        fontSize: 34,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      '${AppBrand.tagline} 🌿',
+                      style: const TextStyle(
+                        color: Color(0xFF1DB954),
+                        fontSize: 14,
+                        letterSpacing: 0.3,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 56),
             FadeTransition(
               opacity: _text_opacity,
-              child: Text(
-                AppBrand.name,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurface,
-                  fontSize: 36,
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 1.5,
+              child: SizedBox(
+                width: 28,
+                height: 28,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: const Color(0xFF1DB954).withValues(alpha: 0.85),
                 ),
               ),
-            ),
-            const SizedBox(height: 10),
-            SlideTransition(
-              position: _tagline_slide,
-              child: FadeTransition(
-                opacity: _tagline_opacity,
-                child: Text(
-                  '${AppBrand.tagline} 🌿',
-                  style: TextStyle(
-                    color: Color(0xFF1DB954),
-                    fontSize: 16,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 80),
-            FadeTransition(
-              opacity: _tagline_opacity,
-              child: _buildLoadingDots(),
             ),
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildLoadingDots() {
-    return AnimatedBuilder(
-      animation: _glow_controller,
-      builder: (context, child) {
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: List.generate(3, (i) {
-            final delay = i * 0.3;
-            final value =
-                ((_glow_controller.value - delay) % 1.0).clamp(0.0, 1.0);
-            return Container(
-              margin: const EdgeInsets.symmetric(horizontal: 4),
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF1DB954).withOpacity(value),
-              ),
-            );
-          }),
-        );
-      },
     );
   }
 }

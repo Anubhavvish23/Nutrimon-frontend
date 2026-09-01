@@ -5,11 +5,10 @@ import '../../../core/errors/app_error_kind.dart';
 import '../../../core/errors/show_api_error.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/theme/app_theme_extension.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../../../core/widgets/error/app_error_screen.dart';
 import '../utils/auth_session_helper.dart';
 import '../utils/google_sign_in_errors.dart';
-import '../providers/terms_acceptance_provider.dart';
-import '../widgets/terms_acceptance_checkbox.dart';
 import '../widgets/auth_ui_helpers.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -26,27 +25,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   bool _obscurePassword = true;
   bool _isLoading = false;
-  bool _terms_checked = false;
-
-  Future<bool> _ensure_terms_accepted() async {
-    final already_accepted = ref.read(termsAcceptedProvider);
-    if (terms_acceptance_required(
-      already_accepted: already_accepted,
-      checked: _terms_checked,
-    )) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please accept the Terms & Conditions to continue'),
-          backgroundColor: Colors.redAccent,
-        ),
-      );
-      return false;
-    }
-    if (!already_accepted) {
-      await ref.read(termsAcceptedProvider.notifier).mark_accepted();
-    }
-    return true;
-  }
 
   @override
   void dispose() {
@@ -69,8 +47,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
     return;
   }
-
-  if (!await _ensure_terms_accepted()) return;
 
   setState(() => _isLoading = true);
 
@@ -102,7 +78,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
 
   Future<void> _handleGoogleLogin() async {
-    if (!await _ensure_terms_accepted()) return;
     try {
       setState(() => _isLoading = true);
       await handleGoogleSignIn(ref);
@@ -128,7 +103,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     final app = context.app;
     final text_theme = Theme.of(context).textTheme;
-    final already_accepted = ref.watch(termsAcceptedProvider);
 
     return Scaffold(
       backgroundColor: app.scaffold,
@@ -160,13 +134,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        'assets/icon/icon.png',
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Center(
-                          child: Text('🌿', style: TextStyle(fontSize: 28)),
-                        ),
-                      ),
+                      child: const AppLogo(size: 52),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -242,14 +210,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               ),
 
               SizedBox(height: keyboard_open ? 20 : 32),
-
-              if (!already_accepted) ...[
-                TermsAcceptanceCheckbox(
-                  value: _terms_checked,
-                  on_changed: (value) => setState(() => _terms_checked = value),
-                ),
-                const SizedBox(height: 16),
-              ],
 
               SizedBox(
                 width: double.infinity,

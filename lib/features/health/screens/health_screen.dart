@@ -156,18 +156,26 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
           ),
         ),
         const SizedBox(width: 12),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Health Check',
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
-            Text(
-              'Select symptoms to find deficiencies',
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ],
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Health Check',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+              Text(
+                'Select symptoms to find deficiencies',
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: app.text_muted,
+                      fontSize: 12,
+                      height: 1.25,
+                    ),
+              ),
+            ],
+          ),
         ),
       ],
     );

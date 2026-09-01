@@ -1,15 +1,14 @@
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'core/config/app_brand.dart';
 import 'core/config/api_config.dart';
 import 'core/providers/theme_mode_provider.dart';
 import 'core/router/app_router.dart';
-import 'core/services/notification_service.dart';
+import 'core/services/app_startup.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/connectivity_gate.dart';
 
-Future<void> main() async {
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
   assert(() {
@@ -17,12 +16,7 @@ Future<void> main() async {
     return true;
   }());
 
-  try {
-    await Firebase.initializeApp();
-    await NotificationService.initialize();
-  } catch (e) {
-    debugPrint('Firebase/notification init failed: $e');
-  }
+  AppStartup.begin();
 
   runApp(
     const ProviderScope(

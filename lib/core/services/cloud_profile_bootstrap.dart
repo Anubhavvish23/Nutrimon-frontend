@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/providers/auth_provider.dart';
 import '../../features/plans/providers/meal_preferences_provider.dart';
+import '../../features/profile/providers/current_user_provider.dart';
 import 'cloud_profile_sync.dart';
 
 final cloudProfileLoadedProvider = StateProvider<bool>((ref) => false);
@@ -32,6 +33,7 @@ final cloudProfileBootstrapProvider = Provider<void>((ref) {
 
     if (ref.read(authProvider) == AuthStatus.authenticated) {
       ref.read(cloudProfileLoadedProvider.notifier).state = true;
+      ref.invalidate(currentUserProvider);
     }
   });
 });

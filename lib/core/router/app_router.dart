@@ -36,7 +36,7 @@ final routerProvider = Provider<GoRouter>((ref) {
   final meal_prefs = ref.watch(mealPreferencesProvider);
 
   return GoRouter(
-    initialLocation: '/signup',
+    initialLocation: '/splash',
     errorBuilder: (context, state) {
       return AppErrorScreen(
         kind: AppErrorKind.notFound,

@@ -5,6 +5,7 @@ import '../../features/plans/data/activity_options.dart';
 import '../../features/plans/data/meal_goal_options.dart';
 import '../../features/plans/providers/meal_preferences_provider.dart';
 import '../config/app_brand.dart';
+import '../widgets/app_logo.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
@@ -161,20 +162,14 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ],
             ),
             child: ClipOval(
-              child: Image.asset(
-                'assets/icon/icon.png',
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => const Center(
-                  child: Text('🌿', style: TextStyle(fontSize: 48)),
-                ),
-              ),
+              child: const AppLogo(size: 120),
             ),
           ),
           const SizedBox(height: 32),
-          const Text(
+          Text(
             'Welcome to ${AppBrand.name}',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               color: Colors.white,
               fontSize: 28,
               fontWeight: FontWeight.bold,

@@ -5,11 +5,9 @@ import '../../../core/errors/show_api_error.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/config/app_brand.dart';
 import '../../../core/theme/app_theme_extension.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../utils/auth_session_helper.dart';
 import '../utils/google_sign_in_errors.dart';
-import '../data/terms_and_conditions.dart';
-import '../providers/terms_acceptance_provider.dart';
-import '../widgets/terms_acceptance_checkbox.dart';
 import '../widgets/auth_ui_helpers.dart';
 
 class SignupScreen extends ConsumerStatefulWidget {
@@ -20,7 +18,6 @@ class SignupScreen extends ConsumerStatefulWidget {
 }
 
 class _SignupScreenState extends ConsumerState<SignupScreen> {
-  final _name_controller = TextEditingController();
   final _email_controller = TextEditingController();
   final _password_controller = TextEditingController();
   final _confirm_password_controller = TextEditingController();
@@ -28,26 +25,9 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   bool _obscure_password = true;
   bool _obscure_confirm = true;
   bool _is_loading = false;
-  bool _terms_checked = false;
-
-  Future<bool> _ensure_terms_accepted() async {
-    final already_accepted = ref.read(termsAcceptedProvider);
-    if (terms_acceptance_required(
-      already_accepted: already_accepted,
-      checked: _terms_checked,
-    )) {
-      _show_message('Please accept the Terms & Conditions to continue');
-      return false;
-    }
-    if (!already_accepted) {
-      await ref.read(termsAcceptedProvider.notifier).mark_accepted();
-    }
-    return true;
-  }
 
   @override
   void dispose() {
-    _name_controller.dispose();
     _email_controller.dispose();
     _password_controller.dispose();
     _confirm_password_controller.dispose();
@@ -55,8 +35,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   Future<void> _handle_email_signup() async {
-    if (_name_controller.text.trim().isEmpty ||
-        _email_controller.text.trim().isEmpty ||
+    if (_email_controller.text.trim().isEmpty ||
         _password_controller.text.isEmpty) {
       _show_message('Please fill all required fields');
       return;
@@ -67,13 +46,11 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
       return;
     }
 
-    if (!await _ensure_terms_accepted()) return;
-
     setState(() => _is_loading = true);
     try {
+      final email = _email_controller.text.trim();
       final result = await ApiService.signup(
-        name: _name_controller.text.trim(),
-        email: _email_controller.text.trim(),
+        email: email,
         password: _password_controller.text.trim(),
       );
 
@@ -83,8 +60,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
         await completeAuthSession(
           ref,
           result['data'] as Map<String, dynamic>,
-          fallback_name: _name_controller.text.trim(),
-          fallback_email: _email_controller.text.trim(),
+          fallback_email: email,
         );
       } else {
         await showApiErrorFromResult(
@@ -99,7 +75,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
   }
 
   Future<void> _handle_google_signup() async {
-    if (!await _ensure_terms_accepted()) return;
     setState(() => _is_loading = true);
     try {
       await handleGoogleSignIn(ref);
@@ -126,7 +101,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
     final bottom_inset = MediaQuery.viewInsetsOf(context).bottom;
     final keyboard_open = bottom_inset > 0;
     final app = context.app;
-    final already_accepted = ref.watch(termsAcceptedProvider);
 
     return Scaffold(
       backgroundColor: app.scaffold,
@@ -157,13 +131,7 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(16),
-                      child: Image.asset(
-                        'assets/icon/icon.png',
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const Center(
-                          child: Text('🌿', style: TextStyle(fontSize: 28)),
-                        ),
-                      ),
+                      child: const AppLogo(size: 52),
                     ),
                   ),
                   const SizedBox(width: 14),
@@ -189,13 +157,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ],
               ),
               SizedBox(height: keyboard_open ? 24 : 36),
-              if (!already_accepted) ...[
-                TermsAcceptanceCheckbox(
-                  value: _terms_checked,
-                  on_changed: (value) => setState(() => _terms_checked = value),
-                ),
-                const SizedBox(height: 16),
-              ],
               AuthGoogleButton(
                 label: 'Sign up with Google',
                 enabled: !_is_loading,
@@ -213,12 +174,6 @@ class _SignupScreenState extends ConsumerState<SignupScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              _build_input(
-                controller: _name_controller,
-                hint: 'Full name',
-                icon: Icons.person_outline,
-              ),
-              const SizedBox(height: 12),
               _build_input(
                 controller: _email_controller,
                 hint: 'Email address',

@@ -234,13 +234,13 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> signup({
-    required String name,
+    String? name,
     required String email,
     required String password,
     String? phone,
   }) async {
     return _post('/auth/signup', {
-      'name': name,
+      if (name != null && name.isNotEmpty) 'name': name,
       'email': email,
       'password': password,
       'phone': phone ?? '',

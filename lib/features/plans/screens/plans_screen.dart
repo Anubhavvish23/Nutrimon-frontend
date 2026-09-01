@@ -702,7 +702,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
                   crossAxisCount: 2,
                   crossAxisSpacing: 12,
                   mainAxisSpacing: 12,
-                  childAspectRatio: 0.72,
+                  childAspectRatio: 0.58,
                 ),
               ),
             ),
@@ -1187,7 +1187,7 @@ class _MealCardState extends State<_MealCard> {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 6),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1196,36 +1196,36 @@ class _MealCardState extends State<_MealCard> {
                           recipe.name,
                           style: TextStyle(
                             color: title_color,
-                            fontSize: 14,
+                            fontSize: 13,
                             fontWeight: FontWeight.bold,
-                            height: 1.2,
+                            height: 1.15,
                           ),
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
                         if (widget.reason != null &&
                             widget.reason!.isNotEmpty) ...[
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 3),
                           Text(
                             widget.reason!,
                             style: TextStyle(
                               color: title_color.withValues(alpha: 0.65),
-                              fontSize: 10,
-                              height: 1.2,
+                              fontSize: 9,
+                              height: 1.15,
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                           ),
                         ],
-                        const SizedBox(height: 6),
+                        const Spacer(),
                         Wrap(
                           spacing: 4,
-                          runSpacing: 4,
+                          runSpacing: 3,
                           children: visible_recipe_tags(recipe.tags, limit: 2).map((tag) {
                             return Container(
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 3,
+                                horizontal: 5,
+                                vertical: 2,
                               ),
                               decoration: BoxDecoration(
                                 color: tag.color.withValues(alpha: 0.15),
@@ -1238,7 +1238,7 @@ class _MealCardState extends State<_MealCard> {
                                 tag.label,
                                 style: TextStyle(
                                   color: tag.color,
-                                  fontSize: 9,
+                                  fontSize: 8,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -1248,6 +1248,7 @@ class _MealCardState extends State<_MealCard> {
                       ],
                     ),
                   ),
+                  const SizedBox(height: 6),
                   Row(
                     children: [
                       Icon(

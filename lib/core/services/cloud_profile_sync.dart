@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/api_service.dart';
+import '../storage/user_storage.dart';
 import '../../features/health/providers/bmi_profile_provider.dart';
 import '../../features/health/providers/health_profile_provider.dart';
 import '../../features/health/providers/selected_symptoms_provider.dart';
@@ -24,6 +25,18 @@ Future<void> loadCloudUserProfile(
   final data = result['data'] as Map<String, dynamic>?;
   final profile = data?['profile'];
   if (profile is! Map<String, dynamic>) return;
+
+  final profile_name = profile['name']?.toString().trim() ?? '';
+  if (profile_name.isNotEmpty) {
+    final profile_email = profile['email']?.toString().trim() ?? '';
+    final stored_email = await UserStorage.getEmail();
+    await UserStorage.saveUser(
+      name: profile_name,
+      email: profile_email.isNotEmpty
+          ? profile_email
+          : (stored_email ?? ''),
+    );
+  }
 
   final has_bmi = profile['has_bmi'] == true;
   if (has_bmi) {

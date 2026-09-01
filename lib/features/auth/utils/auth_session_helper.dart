@@ -5,7 +5,19 @@ import '../../../core/services/cloud_profile_sync.dart';
 import '../../../core/services/google_auth_service.dart';
 import '../../../core/services/local_user_data_reset.dart';
 import '../../../core/services/phone_auth_service.dart';
+import '../../profile/providers/current_user_provider.dart';
 import '../providers/auth_provider.dart';
+
+String resolve_display_name({String? name, String? email}) {
+  final trimmed_name = name?.trim() ?? '';
+  if (trimmed_name.isNotEmpty) return trimmed_name;
+
+  final trimmed_email = email?.trim() ?? '';
+  final at = trimmed_email.indexOf('@');
+  if (at > 0) return trimmed_email.substring(0, at);
+
+  return 'Nutri User';
+}
 
 Future<void> completeAuthSession(
   WidgetRef ref,
@@ -18,21 +30,29 @@ Future<void> completeAuthSession(
   final user = data['user'] as Map<String, dynamic>?;
   final name = (user?['name'] as String?)?.trim();
   final email = (user?['email'] as String?)?.trim();
+  final resolved_email = (email != null && email.isNotEmpty)
+      ? email
+      : fallback_email ?? '';
+  final resolved_name = resolve_display_name(
+    name: name ?? fallback_name,
+    email: resolved_email,
+  );
 
   await clearLocalUserData(ref);
   await ref.read(authProvider.notifier).login(
         token,
         refresh_token: refresh_token,
-        name: (name != null && name.isNotEmpty)
-            ? name
-            : fallback_name ?? 'Nutri User',
-        email: (email != null && email.isNotEmpty)
-            ? email
-            : fallback_email ?? '',
+        name: resolved_name,
+        email: resolved_email,
       );
+
+  try {
+    await ApiService.saveUserProfile({'name': resolved_name});
+  } catch (_) {}
 
   await loadCloudUserProfile(ref.read);
   ref.read(cloudProfileLoadedProvider.notifier).state = true;
+  ref.invalidate(currentUserProvider);
 }
 
 Future<void> completeFirebaseDirectSession(WidgetRef ref) async {
@@ -47,19 +67,22 @@ Future<void> completeFirebaseDirectSession(WidgetRef ref) async {
   }
 
   final phone = user.phoneNumber ?? '';
-  final name = (user.displayName != null && user.displayName!.trim().isNotEmpty)
-      ? user.displayName!.trim()
-      : (phone.isNotEmpty ? phone : 'Nutri User');
+  final resolved_email = user.email ?? phone;
+  final name = resolve_display_name(
+    name: user.displayName,
+    email: resolved_email,
+  );
 
   await clearLocalUserData(ref);
   await ref.read(authProvider.notifier).login(
         token,
         name: name,
-        email: user.email ?? phone,
+        email: resolved_email,
       );
 
   await loadCloudUserProfile(ref.read);
   ref.read(cloudProfileLoadedProvider.notifier).state = true;
+  ref.invalidate(currentUserProvider);
 }
 
 Future<void> handleGoogleSignIn(WidgetRef ref) async {

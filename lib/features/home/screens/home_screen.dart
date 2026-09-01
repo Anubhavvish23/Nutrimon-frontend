@@ -6,6 +6,7 @@ import '../../../core/config/app_brand.dart';
 import '../../../core/skeleton/skeleton.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../../../core/widgets/ambient_background.dart';
+import '../../../core/widgets/app_logo.dart';
 import '../../../core/widgets/premium/premium_card.dart';
 import '../models/did_you_know_fact.dart';
 import '../providers/did_you_know_provider.dart';
@@ -405,12 +406,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
               ),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(7),
-                child: Image.asset(
-                  'assets/icon/icon.png',
-                  fit: BoxFit.cover,
-                  errorBuilder: (_, __, ___) =>
-                      const Center(child: Text('🌿', style: TextStyle(fontSize: 14))),
-                ),
+                child: const AppLogo(size: 28),
               ),
             ),
             const SizedBox(width: 8),
