@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "5175540679",
+    "project_id": "nutrimorning-497313",
+    "storage_bucket": "nutrimorning-497313.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:5175540679:android:dc4c62d5502de5900737e2",
+        "android_client_info": {
+          "package_name": "com.nutrimorning.nutrimorning_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "5175540679-0528shg6eoqohf0nr7b086idqi4um5at.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nutrimorning.nutrimorning_app",
+            "certificate_hash": "66672c01dbef07e9bbd7e02e74d61c102ee715ed"
+          }
+        },
+        {
+          "client_id": "5175540679-ctcl5h54s9ltbgsd1r7e3rshik6i6d5a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nutrimorning.nutrimorning_app",
+            "certificate_hash": "f57f4668366fab0f0c666a7f81290090d36fd3c6"
+          }
+        },
+        {
+          "client_id": "5175540679-uvg1d0opo24fbiliend5f5meojjiof9o.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.nutrimorning.nutrimorning_app",
+            "certificate_hash": "0b0914968c44d968b50b65581dee3b9dd2f92865"
+          }
+        },
+        {
+          "client_id": "5175540679-cdhukn40mjscrumfnd225fv9u4k5b081.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAH_PXXs44sCf_8bA7u9QOS2TwmsVDQKcc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "5175540679-cdhukn40mjscrumfnd225fv9u4k5b081.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

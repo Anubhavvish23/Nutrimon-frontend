@@ -1,0 +1,48 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "NutriMorning",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=API_BASE_URL=http://10.181.63.75:8080"
+      ]
+    },
+    {
+      "name": "NutriMorning (with Google)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=API_BASE_URL=http://10.181.63.75:8080",
+        "--dart-define=GOOGLE_SERVER_CLIENT_ID=PASTE_YOUR_WEB_CLIENT_ID.apps.googleusercontent.com"
+      ]
+    },
+    {
+      "name": "NutriMorning (USB)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=API_BASE_URL=http://127.0.0.1:8080",
+        "--dart-define=API_USE_LOCALHOST=true"
+      ]
+    },
+    {
+      "name": "NutriMorning (Android emulator)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=API_BASE_URL=http://10.0.2.2:8080",
+        "--dart-define=API_ANDROID_EMULATOR=true"
+      ]
+    },
+    {
+      "name": "NutriMorning (Production)",
+      "request": "launch",
+      "type": "dart",
+      "args": [
+        "--dart-define=API_BASE_URL=https://nutrimon-backend-production.up.railway.app"
+      ]
+    }
+  ]
+}
