@@ -613,6 +613,13 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     );
   }
 
+  void _go_to_results_tab() {
+    if (_tabController.index != 2) {
+      _tabController.animateTo(2, duration: Duration.zero);
+    }
+    setState(() {});
+  }
+
   Future<void> _runAnalysis({
     List<String> slugs = const [],
     String custom_text = '',
@@ -629,9 +636,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     }
 
     setState(() => _analyzing = true);
-    if (_tabController.index != 2) {
-      _tabController.animateTo(2);
-    }
+    _go_to_results_tab();
 
     final bmi = ref.read(bmiProfileProvider);
     final health = ref.read(healthProfileProvider);
@@ -676,46 +681,29 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
       },
     });
 
-    _tabController.animateTo(2);
-    await _promptSaveAfterAnalysis(slugs: slugs, custom_text: trimmed_custom);
+    _go_to_results_tab();
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Analysis complete'),
+        backgroundColor: const Color(0xFF1DB954),
+        action: SnackBarAction(
+          label: 'Save symptoms',
+          textColor: Colors.white,
+          onPressed: () => _save_analyzed_symptoms(
+            slugs: slugs,
+            custom_text: trimmed_custom,
+          ),
+        ),
+      ),
+    );
   }
 
-  Future<void> _promptSaveAfterAnalysis({
+  Future<void> _save_analyzed_symptoms({
     required List<String> slugs,
     required String custom_text,
   }) async {
-    final should_save = await showDialog<bool>(
-      context: context,
-      useRootNavigator: true,
-      builder: (dialog_context) {
-        final dialog_app = dialog_context.app;
-        final dialog_on_surface = dialog_context.on_surface;
-        return AlertDialog(
-          backgroundColor: dialog_app.surface,
-          title: Text(
-            'Save these symptoms?',
-            style: TextStyle(color: dialog_on_surface),
-          ),
-          content: Text(
-            'Saving links them to your account and can refresh your breakfast plan.',
-            style: TextStyle(color: dialog_app.text_muted, height: 1.4),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialog_context).pop(false),
-              child: const Text('No'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(dialog_context).pop(true),
-              child: const Text('Yes, save'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (!mounted || should_save != true) return;
-
     final existing = ref.read(selectedSymptomsProvider);
     final next_slugs = {...existing, ...slugs}.toList();
     if (custom_text.isNotEmpty && !next_slugs.contains(custom_text)) {

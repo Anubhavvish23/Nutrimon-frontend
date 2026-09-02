@@ -1,5 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter/material.dart' show Color;
+import 'package:flutter/material.dart' show Color, debugPrint;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/data/latest_all.dart' as tz_data;
@@ -9,12 +9,16 @@ import 'api_service.dart';
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
+  await NotificationService.ensure_local_plugin();
+  await NotificationService.show_from_message(message);
 }
 
 class NotificationService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   static final FlutterLocalNotificationsPlugin _local_notifications =
       FlutterLocalNotificationsPlugin();
+  static bool _local_ready = false;
+  static bool _initialized = false;
 
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
     'nutrimorning_channel',
@@ -55,14 +59,39 @@ class NotificationService {
     ),
   ];
 
+  static Future<void> register_background_handler() async {
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  }
+
   static Future<void> initialize() async {
+    if (_initialized) return;
+    _initialized = true;
+
+    tz_data.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation('Asia/Kolkata'));
+
+    await ensure_local_plugin();
+
     final settings = await _messaging.requestPermission(
       alert: true,
       badge: true,
       sound: true,
     );
 
-    tz_data.initializeTimeZones();
+    FirebaseMessaging.onMessage.listen(show_from_message);
+
+    if (settings.authorizationStatus != AuthorizationStatus.denied) {
+      await reschedule_daily_reminders();
+    }
+
+    await sync_token();
+    _messaging.onTokenRefresh.listen((_) {
+      sync_token();
+    });
+  }
+
+  static Future<void> ensure_local_plugin() async {
+    if (_local_ready) return;
 
     final android_plugin = _local_notifications
         .resolvePlatformSpecificImplementation<
@@ -75,35 +104,38 @@ class NotificationService {
         AndroidInitializationSettings('@mipmap/ic_launcher');
     const init_settings = InitializationSettings(android: android_settings);
     await _local_notifications.initialize(init_settings);
-
-    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _show_local_notification(message);
-    });
-
-    if (settings.authorizationStatus != AuthorizationStatus.denied) {
-      await _schedule_daily_reminders();
-    }
-
-    final token = await _messaging.getToken();
-    if (token != null) {
-      await ApiService.registerFCMToken(token: token);
-    }
-
-    _messaging.onTokenRefresh.listen((new_token) async {
-      await ApiService.registerFCMToken(token: new_token);
-    });
+    _local_ready = true;
   }
 
-  static Future<void> _show_local_notification(RemoteMessage message) async {
-    final notification = message.notification;
-    if (notification == null) return;
+  static Future<void> reschedule_daily_reminders() async {
+    await ensure_local_plugin();
 
+    for (final reminder in _daily_reminders) {
+      await _local_notifications.cancel(reminder.id);
+    }
+
+    for (final reminder in _daily_reminders) {
+      await _schedule_one(
+        reminder.id,
+        reminder.title,
+        reminder.body,
+        reminder.hour,
+        reminder.minute,
+      );
+    }
+  }
+
+  static Future<void> show_from_message(RemoteMessage message) async {
+    final notification = message.notification;
+    final title = notification?.title ?? message.data['title'];
+    final body = notification?.body ?? message.data['body'];
+    if (title == null && body == null) return;
+
+    await ensure_local_plugin();
     await _local_notifications.show(
-      notification.hashCode,
-      notification.title,
-      notification.body,
+      notification?.hashCode ?? message.hashCode,
+      title,
+      body,
       _notification_details(),
     );
   }
@@ -122,15 +154,35 @@ class NotificationService {
     );
   }
 
-  static Future<void> _schedule_daily_reminders() async {
-    for (final reminder in _daily_reminders) {
+  static Future<void> _schedule_one(
+    int id,
+    String title,
+    String body,
+    int hour,
+    int minute,
+  ) async {
+    final when = _next_instance(hour, minute);
+    try {
       await _local_notifications.zonedSchedule(
-        reminder.id,
-        reminder.title,
-        reminder.body,
-        _next_instance(reminder.hour, reminder.minute),
+        id,
+        title,
+        body,
+        when,
         _notification_details(),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    } catch (e) {
+      debugPrint('Exact alarm schedule failed for $id: $e');
+      await _local_notifications.zonedSchedule(
+        id,
+        title,
+        body,
+        when,
+        _notification_details(),
+        androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
         matchDateTimeComponents: DateTimeComponents.time,
@@ -148,10 +200,20 @@ class NotificationService {
       hour,
       minute,
     );
-    if (scheduled.isBefore(now)) {
+    if (!scheduled.isAfter(now)) {
       scheduled = scheduled.add(const Duration(days: 1));
     }
     return scheduled;
+  }
+
+  static Future<void> sync_token() async {
+    try {
+      final token = await _messaging.getToken();
+      if (token == null || token.isEmpty) return;
+      await ApiService.registerFCMToken(token: token);
+    } catch (e) {
+      debugPrint('FCM token sync failed: $e');
+    }
   }
 
   static Future<String?> getToken() async {

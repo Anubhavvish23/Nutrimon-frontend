@@ -1,3 +1,4 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,7 +8,10 @@ import 'core/providers/theme_mode_provider.dart';
 import 'core/router/app_router.dart';
 import 'core/services/api_service.dart';
 import 'core/services/app_startup.dart';
+import 'core/services/app_update_service.dart';
+import 'core/services/notification_service.dart';
 import 'core/theme/app_theme.dart';
+import 'core/widgets/app_update_dialog.dart';
 import 'core/widgets/connectivity_gate.dart';
 
 Future<void> main() async {
@@ -19,6 +23,8 @@ Future<void> main() async {
   }());
 
   await SharedPreferences.getInstance();
+  await Firebase.initializeApp();
+  await NotificationService.register_background_handler();
   AppStartup.begin();
 
   runApp(
@@ -49,10 +55,23 @@ class _NutriMorningAppState extends ConsumerState<NutriMorningApp>
     super.dispose();
   }
 
+  Future<void> _check_update_on_resume() async {
+    final update = await AppUpdateService.check_for_update();
+    if (!mounted || update == null) return;
+
+    final router = ref.read(routerProvider);
+    final context = router.routerDelegate.navigatorKey.currentContext;
+    if (context == null || !context.mounted) return;
+
+    await showAppUpdateDialog(context, update);
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       ApiService.ensureFreshAccessToken();
+      NotificationService.reschedule_daily_reminders();
+      _check_update_on_resume();
     }
   }
 

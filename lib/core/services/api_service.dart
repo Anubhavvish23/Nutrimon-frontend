@@ -302,10 +302,14 @@ class ApiService {
     required String token,
     String? user_id,
   }) async {
-    final result = await _post('/notifications/register-token', {
-      'fcm_token': token,
-      'user_id': user_id ?? 'current_user',
-    });
+    final result = await _post(
+      '/notifications/register-token',
+      {
+        'fcm_token': token,
+        if (user_id != null) 'user_id': user_id,
+      },
+      with_auth: true,
+    );
 
     if (result['success'] != true) {
       assert(() {

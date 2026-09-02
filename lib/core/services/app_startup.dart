@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'notification_service.dart';
 
@@ -18,8 +17,7 @@ class AppStartup {
 
   static Future<void> _run() async {
     try {
-      await Firebase.initializeApp();
-      unawaited(NotificationService.initialize());
+      await NotificationService.initialize();
     } catch (e) {
       debugPrint('App startup init failed: $e');
     } finally {

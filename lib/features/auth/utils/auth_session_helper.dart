@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/services/cloud_profile_bootstrap.dart';
+import '../../../core/services/notification_service.dart';
 import '../../../core/services/cloud_profile_sync.dart';
 import '../../../core/services/google_auth_service.dart';
 import '../../../core/services/local_user_data_reset.dart';
@@ -53,6 +54,7 @@ Future<void> completeAuthSession(
   await loadCloudUserProfile(ref.read);
   ref.read(cloudProfileLoadedProvider.notifier).state = true;
   ref.invalidate(currentUserProvider);
+  await NotificationService.sync_token();
 }
 
 Future<void> completeFirebaseDirectSession(WidgetRef ref) async {
@@ -83,6 +85,7 @@ Future<void> completeFirebaseDirectSession(WidgetRef ref) async {
   await loadCloudUserProfile(ref.read);
   ref.read(cloudProfileLoadedProvider.notifier).state = true;
   ref.invalidate(currentUserProvider);
+  await NotificationService.sync_token();
 }
 
 Future<void> handleGoogleSignIn(WidgetRef ref) async {

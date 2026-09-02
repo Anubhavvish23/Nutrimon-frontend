@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/providers/terms_acceptance_provider.dart';
 import '../../features/auth/widgets/post_login_setup.dart';
 import '../../features/profile/providers/current_user_provider.dart';
+import '../services/app_update_service.dart';
+import 'app_update_dialog.dart';
 import 'premium/premium_bottom_nav.dart';
 
 class MainShell extends ConsumerStatefulWidget {
@@ -16,11 +18,21 @@ class MainShell extends ConsumerStatefulWidget {
 
 class _MainShellState extends ConsumerState<MainShell> {
   bool _setup_started = false;
+  bool _update_checked = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) => _run_post_login_setup());
+  }
+
+  Future<void> _check_for_app_update() async {
+    if (_update_checked || !mounted) return;
+    _update_checked = true;
+
+    final update = await AppUpdateService.check_for_update();
+    if (!mounted || update == null) return;
+    await showAppUpdateDialog(context, update);
   }
 
   Future<void> _run_post_login_setup() async {
@@ -36,6 +48,7 @@ class _MainShellState extends ConsumerState<MainShell> {
 
     if (!mounted) return;
     ref.invalidate(currentUserProvider);
+    await _check_for_app_update();
   }
 
   @override
