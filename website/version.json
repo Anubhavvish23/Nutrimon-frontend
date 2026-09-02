@@ -1,7 +1,7 @@
 {
-  "latest_version": "1.0.0",
-  "message": "Bug fixes and performance improvements.",
+  "latest_version": "1.0.1",
+  "build_number": 2,
   "apk_url": "downloads/nutrimorning.apk",
-  "build_number": 1,
+  "message": "Notifications fix, faster startup, and in-app update alerts.",
   "force_update": false
 }
