@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/services/api_service.dart';
+import '../../../core/skeleton/skeleton.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../models/bmi_profile.dart';
@@ -65,6 +66,9 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     super.initState();
 
     _tabController = TabController(length: 3, vsync: this);
+    _tabController.addListener(() {
+      if (mounted) setState(() {});
+    });
 
     _staggerController = AnimationController(
       vsync: this,
@@ -130,7 +134,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
                 ],
               ),
             ),
-            if (selected_symptom_slugs.isNotEmpty)
+            if (selected_symptom_slugs.isNotEmpty && _tabController.index != 2)
               _buildAnalyzeButton(selected_symptom_slugs.length),
           ],
         ),
@@ -219,8 +223,17 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
 
   Widget _buildSymptomsTab(AsyncValue<List<SymptomCatalogItem>> catalog_async) {
     return catalog_async.when(
-      loading: () => const Center(
-        child: CircularProgressIndicator(color: Color(0xFF1DB954)),
+      loading: () => const Padding(
+        padding: EdgeInsets.all(20),
+        child: Column(
+          children: [
+            SkeletonCard(height: 110, border_radius: BorderRadius.all(Radius.circular(18))),
+            SizedBox(height: 12),
+            SkeletonCard(height: 110, border_radius: BorderRadius.all(Radius.circular(18))),
+            SizedBox(height: 12),
+            SkeletonCard(height: 110, border_radius: BorderRadius.all(Radius.circular(18))),
+          ],
+        ),
       ),
       error: (error, _) {
         final on_surface = context.on_surface;
@@ -616,6 +629,9 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     }
 
     setState(() => _analyzing = true);
+    if (_tabController.index != 2) {
+      _tabController.animateTo(2);
+    }
 
     final bmi = ref.read(bmiProfileProvider);
     final health = ref.read(healthProfileProvider);
@@ -670,6 +686,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
   }) async {
     final should_save = await showDialog<bool>(
       context: context,
+      useRootNavigator: true,
       builder: (dialog_context) {
         final dialog_app = dialog_context.app;
         final dialog_on_surface = dialog_context.on_surface;
@@ -685,11 +702,11 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(false),
+              onPressed: () => Navigator.of(dialog_context).pop(false),
               child: const Text('No'),
             ),
             ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(true),
+              onPressed: () => Navigator.of(dialog_context).pop(true),
               child: const Text('Yes, save'),
             ),
           ],
@@ -772,6 +789,10 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
   }
 
   Widget _buildResultsTab() {
+    if (_analyzing) {
+      return const _SymptomAnalyzeLoading();
+    }
+
     final analysis = ref.watch(symptomAnalysisProvider);
     if (analysis == null || analysis.analysis.isEmpty) {
       return const EmptyStateView(
@@ -784,7 +805,20 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     final app = context.app;
     final on_surface = context.on_surface;
     final is_dark = context.is_dark_mode;
-    return ListView(
+    return TweenAnimationBuilder<double>(
+      tween: Tween(begin: 0, end: 1),
+      duration: const Duration(milliseconds: 420),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 16 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
+      child: ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       children: [
         Text(
@@ -961,6 +995,94 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
           ),
         ),
       ],
+    ),
+    );
+  }
+}
+
+class _SymptomAnalyzeLoading extends StatelessWidget {
+  const _SymptomAnalyzeLoading();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+      child: Column(
+        children: [
+          const SizedBox(height: 12),
+          const DidYouKnowSkeleton(),
+          const SizedBox(height: 16),
+          SkeletonCard(
+            height: 88,
+            border_radius: BorderRadius.circular(14),
+          ),
+          const SizedBox(height: 12),
+          SkeletonCard(
+            height: 88,
+            border_radius: BorderRadius.circular(14),
+          ),
+          const SizedBox(height: 28),
+          const _AnalyzingPulse(),
+          const SizedBox(height: 12),
+          Text(
+            'Reading your symptoms…',
+            style: Theme.of(context).textTheme.titleSmall,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'This usually takes a few seconds.',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AnalyzingPulse extends StatefulWidget {
+  const _AnalyzingPulse();
+
+  @override
+  State<_AnalyzingPulse> createState() => _AnalyzingPulseState();
+}
+
+class _AnalyzingPulseState extends State<_AnalyzingPulse>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ScaleTransition(
+      scale: Tween<double>(begin: 0.92, end: 1.08).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+      ),
+      child: Container(
+        width: 56,
+        height: 56,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: const Color(0xFF1DB954).withValues(alpha: 0.14),
+        ),
+        child: const Icon(
+          Icons.biotech,
+          color: Color(0xFF1DB954),
+        ),
+      ),
     );
   }
 }

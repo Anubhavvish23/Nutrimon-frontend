@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../skeleton_responsive.dart';
+import 'did_you_know_skeleton.dart';
 import '../widgets/skeleton_card.dart';
 import '../widgets/skeleton_text.dart';
 
@@ -37,10 +38,7 @@ class HomeDashboardSkeleton extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 24),
-          SkeletonCard(
-            height: 140,
-            border_radius: BorderRadius.circular(20),
-          ),
+          const DidYouKnowSkeleton(),
           const SizedBox(height: 20),
           SkeletonCard(
             height: 88,

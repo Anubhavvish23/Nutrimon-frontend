@@ -10,6 +10,7 @@ export 'widgets/skeleton_list_tile.dart';
 export 'widgets/skeleton_shimmer.dart';
 export 'widgets/skeleton_staggered_list.dart';
 export 'widgets/skeleton_text.dart';
+export 'layouts/did_you_know_skeleton.dart';
 export 'layouts/home_dashboard_skeleton.dart';
 export 'layouts/plans_list_skeleton.dart';
 export 'layouts/profile_screen_skeleton.dart';

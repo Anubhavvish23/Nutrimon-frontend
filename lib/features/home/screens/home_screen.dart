@@ -293,7 +293,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           const SizedBox(height: 24),
           _buildHeader(),
           if (!_facts_hidden) ...[
-            const SizedBox(height: 24),
+            const SizedBox(height: 20),
             _buildDidYouKnowSection(facts_async),
           ],
           const SizedBox(height: 20),
@@ -418,14 +418,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     );
   }
   Widget _buildDidYouKnowSection(AsyncValue<List<DidYouKnowFact>> facts_async) {
-    return facts_async.when(
-      loading: () => const SizedBox(
-        height: 140,
-        child: Center(
-          child: CircularProgressIndicator(color: Color(0xFF1DB954)),
-        ),
-      ),
-      error: (error, _) => PremiumCard(
+    final is_loading = facts_async.isLoading && !facts_async.hasValue;
+    return SkeletonFadeSwitcher(
+      is_loading: is_loading,
+      skeleton: const DidYouKnowSkeleton(),
+      child: facts_async.when(
+        skipLoadingOnReload: true,
+        loading: () => const DidYouKnowSkeleton(),
+        error: (error, _) => PremiumCard(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -456,6 +456,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
         }
         return _buildDidYouKnow(facts);
       },
+      ),
     );
   }
 
@@ -470,11 +471,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
     final dot_inactive = context.fact_dot_inactive;
 
     return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 400),
-      transitionBuilder: (child, animation) => FadeTransition(
-        opacity: animation,
-        child: child,
-      ),
+      duration: const Duration(milliseconds: 450),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeInCubic,
+      transitionBuilder: (child, animation) {
+        final offset = Tween<Offset>(
+          begin: const Offset(0, 0.08),
+          end: Offset.zero,
+        ).animate(animation);
+        return FadeTransition(
+          opacity: animation,
+          child: SlideTransition(position: offset, child: child),
+        );
+      },
       child: Container(
         key: ValueKey(_currentFactIndex),
         padding: const EdgeInsets.all(18),

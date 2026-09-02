@@ -36,6 +36,7 @@ class ApiService {
       'X-API-Key': ApiConfig.apiKey,
     };
     if (with_auth) {
+      await ensureFreshAccessToken();
       final token = await TokenStorage.getToken();
       if (token != null && token.isNotEmpty) {
         headers['Authorization'] = 'Bearer $token';
@@ -44,11 +45,35 @@ class ApiService {
     return headers;
   }
 
-  static bool _refresh_in_flight = false;
+  static Completer<bool>? _refresh_completer;
+
+  static Future<void> ensureFreshAccessToken() async {
+    final token = await TokenStorage.getToken();
+    if (token == null || token.isEmpty) return;
+    final expiring = await TokenStorage.is_expiring_soon();
+    if (!expiring) return;
+    await _tryRefreshToken();
+  }
 
   static Future<bool> _tryRefreshToken() async {
-    if (_refresh_in_flight) return false;
+    final in_flight = _refresh_completer;
+    if (in_flight != null) return in_flight.future;
 
+    final completer = Completer<bool>();
+    _refresh_completer = completer;
+    try {
+      final ok = await _refreshTokenOnce();
+      completer.complete(ok);
+      return ok;
+    } catch (_) {
+      completer.complete(false);
+      return false;
+    } finally {
+      _refresh_completer = null;
+    }
+  }
+
+  static Future<bool> _refreshTokenOnce() async {
     final firebase_token = await PhoneAuthService.fresh_id_token();
     if (firebase_token != null && firebase_token.isNotEmpty) {
       await TokenStorage.saveToken(firebase_token);
@@ -58,26 +83,21 @@ class ApiService {
     final refresh_token = await TokenStorage.getRefreshToken();
     if (refresh_token == null || refresh_token.isEmpty) return false;
 
-    _refresh_in_flight = true;
-    try {
-      final result = await _post('/auth/refresh', {
-        'refresh_token': refresh_token,
-      });
-      if (result['success'] != true) return false;
+    final result = await _post('/auth/refresh', {
+      'refresh_token': refresh_token,
+    });
+    if (result['success'] != true) return false;
 
-      final data = result['data'] as Map<String, dynamic>?;
-      final access_token = data?['access_token']?.toString();
-      final next_refresh = data?['refresh_token']?.toString();
-      if (access_token == null || access_token.isEmpty) return false;
+    final data = result['data'] as Map<String, dynamic>?;
+    final access_token = data?['access_token']?.toString();
+    final next_refresh = data?['refresh_token']?.toString();
+    if (access_token == null || access_token.isEmpty) return false;
 
-      await TokenStorage.saveTokens(
-        access_token: access_token,
-        refresh_token: next_refresh,
-      );
-      return true;
-    } finally {
-      _refresh_in_flight = false;
-    }
+    await TokenStorage.saveTokens(
+      access_token: access_token,
+      refresh_token: next_refresh,
+    );
+    return true;
   }
 
   static Future<Map<String, dynamic>> _parseResponse(

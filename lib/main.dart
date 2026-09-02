@@ -5,6 +5,7 @@ import 'core/config/app_brand.dart';
 import 'core/config/api_config.dart';
 import 'core/providers/theme_mode_provider.dart';
 import 'core/router/app_router.dart';
+import 'core/services/api_service.dart';
 import 'core/services/app_startup.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/connectivity_gate.dart';
@@ -27,11 +28,36 @@ Future<void> main() async {
   );
 }
 
-class NutriMorningApp extends ConsumerWidget {
+class NutriMorningApp extends ConsumerStatefulWidget {
   const NutriMorningApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NutriMorningApp> createState() => _NutriMorningAppState();
+}
+
+class _NutriMorningAppState extends ConsumerState<NutriMorningApp>
+    with WidgetsBindingObserver {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      ApiService.ensureFreshAccessToken();
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final router = ref.watch(routerProvider);
     final theme_mode = ref.watch(themeModeProvider);
 
