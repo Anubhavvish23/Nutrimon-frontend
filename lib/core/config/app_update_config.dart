@@ -7,6 +7,8 @@ class AppUpdateConfig {
   static String get version_check_url {
     if (_env_check_url.isNotEmpty) return _env_check_url;
     return '$default_site_url/version.json';
+  }
+
   static String get site_base_url {
     final check_url = version_check_url;
     const suffix = '/version.json';

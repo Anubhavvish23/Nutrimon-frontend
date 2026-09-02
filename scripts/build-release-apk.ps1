@@ -1,5 +1,6 @@
 param(
-    [string]$ApiBaseUrl = "https://nutrimon-backend-production.up.railway.app"
+    [string]$ApiBaseUrl = "https://nutrimon-backend-production.up.railway.app",
+    [string]$UpdateSiteUrl = "https://nutrimorning-frontend.vercel.app"
 )
 
 $ErrorActionPreference = "Stop"
@@ -11,12 +12,34 @@ if (-not (Test-Path $flutter)) {
     $flutter = "flutter"
 }
 
+$pubspec = Get-Content (Join-Path $root "pubspec.yaml") -Raw
+if ($pubspec -match 'version:\s*([0-9]+\.[0-9]+\.[0-9]+)\+([0-9]+)') {
+    $version_name = $Matches[1]
+    $build_number = [int]$Matches[2]
+} else {
+    throw "Could not read version from pubspec.yaml"
+}
+
+$version_json = @{
+    latest_version = $version_name
+    build_number = $build_number
+    apk_url = "downloads/nutrimorning.apk"
+    message = "Bug fixes and performance improvements."
+    force_update = $false
+} | ConvertTo-Json
+
+$version_path = Join-Path $root "website\version.json"
+Set-Content -Path $version_path -Value $version_json -Encoding utf8
+
 Write-Host "Building release APK..."
 Write-Host "API: $ApiBaseUrl"
+Write-Host "Version: $version_name+$build_number"
+Write-Host "Update check: $UpdateSiteUrl/version.json"
 Write-Host ""
 
 & $flutter build apk --release `
-    --dart-define="API_BASE_URL=$ApiBaseUrl"
+    --dart-define="API_BASE_URL=$ApiBaseUrl" `
+    --dart-define="UPDATE_CHECK_URL=$UpdateSiteUrl/version.json"
 
 $apk_source = Join-Path $root "build\app\outputs\flutter-apk\app-release.apk"
 $downloads_dir = Join-Path $root "website\downloads"
@@ -35,8 +58,9 @@ Write-Host ""
 Write-Host "Done!"
 Write-Host "  APK: $apk_dest"
 Write-Host "  Size: ${size_mb} MB"
+Write-Host "  version.json: $version_path"
 Write-Host ""
-Write-Host "Website folder: $root\website"
-Write-Host "  Open index.html locally or deploy to Firebase / GitHub Pages / Railway"
-Write-Host ""
-Write-Host "Quick test: open website\index.html in browser and tap Download"
+Write-Host "Before releasing a new version:"
+Write-Host "  1. Bump version in pubspec.yaml (e.g. 1.0.1+2)"
+Write-Host "  2. Run this script again"
+Write-Host "  3. Push to GitHub so Vercel serves the new APK + version.json"
