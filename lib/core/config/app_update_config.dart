@@ -2,7 +2,7 @@ class AppUpdateConfig {
   static const String _env_check_url = String.fromEnvironment('UPDATE_CHECK_URL');
 
   static const String default_site_url =
-      'https://nutrimorning-frontend.vercel.app';
+      'https://nutrimon-frontend.vercel.app';
 
   static String get version_check_url {
     if (_env_check_url.isNotEmpty) return _env_check_url;

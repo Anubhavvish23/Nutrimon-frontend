@@ -1,6 +1,6 @@
 param(
     [string]$ApiBaseUrl = "https://nutrimon-backend-production.up.railway.app",
-    [string]$UpdateSiteUrl = "https://nutrimorning-frontend.vercel.app"
+    [string]$UpdateSiteUrl = "https://nutrimon-frontend.vercel.app"
 )
 
 $ErrorActionPreference = "Stop"
