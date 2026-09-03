@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import '../../../core/router/nav.dart';
 import '../../../core/services/api_service.dart';
 import '../../../core/skeleton/skeleton.dart';
 import '../../../core/theme/app_theme_extension.dart';
@@ -231,7 +231,7 @@ class _FridgeRouletteScreenState extends ConsumerState<FridgeRouletteScreen>
                     child: Row(
                       children: [
                         IconButton(
-                          onPressed: () => context.pop(),
+                          onPressed: () => pop_or_home(context),
                           icon: Icon(
                             Icons.arrow_back_ios_new,
                             size: 18,

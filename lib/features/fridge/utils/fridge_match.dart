@@ -2,6 +2,7 @@ import 'dart:math';
 
 import '../../plans/models/recipe.dart';
 import '../data/fridge_ingredients.dart';
+import 'fridge_pairing.dart';
 
 class FridgeMatchResult {
   final Recipe recipe;
@@ -286,9 +287,11 @@ List<FridgeMatchResult> matchRecipesToFridge({
 }) {
   if (selected_ids.isEmpty || recipes.isEmpty) return [];
 
+  final cook_ids = select_compatible_ids(selected_ids);
   final picks = fridgeIngredientOptions
-      .where((item) => selected_ids.contains(item.id))
+      .where((item) => cook_ids.contains(item.id))
       .toList();
+  if (picks.isEmpty) return [];
 
   final results = <FridgeMatchResult>[];
   for (final recipe in recipes) {
@@ -306,7 +309,7 @@ List<FridgeMatchResult> matchRecipesToFridge({
 
     if (matched_labels.length != picks.length) continue;
 
-    final score = _score_recipe(recipe, picks, selected_ids, profile);
+    final score = _score_recipe(recipe, picks, cook_ids, profile);
     results.add(
       FridgeMatchResult(
         recipe: recipe,

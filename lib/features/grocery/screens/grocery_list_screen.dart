@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import '../../../core/router/nav.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../../plans/providers/saved_meal_plan_provider.dart';
 import '../providers/grocery_checked_provider.dart';
@@ -53,7 +53,7 @@ class _GroceryListScreenState extends ConsumerState<GroceryListScreen> {
         backgroundColor: app.scaffold,
         elevation: 0,
         leading: IconButton(
-          onPressed: () => context.pop(),
+          onPressed: () => pop_or_home(context),
           icon: Icon(Icons.arrow_back_ios_new, size: 18, color: on_surface),
         ),
         title: Text(

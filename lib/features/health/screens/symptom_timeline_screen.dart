@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import '../../../core/router/nav.dart';
 import '../../../core/skeleton/skeleton.dart';
 import '../../../core/widgets/ambient_background.dart';
 import '../../../core/widgets/empty_state_view.dart';
@@ -29,7 +29,7 @@ class SymptomTimelineScreen extends ConsumerWidget {
                 child: Row(
                   children: [
                     IconButton(
-                      onPressed: () => context.pop(),
+                      onPressed: () => pop_or_home(context),
                       icon: const Icon(Icons.arrow_back_ios_new, size: 18),
                     ),
                     const Expanded(

@@ -1,7 +1,7 @@
 {
-  "message": "Allergy-safe meal plans, working daily reminders, and light mode fixes.",
-  "force_update": false,
+  "latest_version": "1.0.2",
   "apk_url": "downloads/nutrimorning.apk",
-  "latest_version": "1.0.1",
-  "build_number": 2
+  "message": "Smarter fridge recipes, home back buttons, and pairing that skips clashing ingredients.",
+  "build_number": 3,
+  "force_update": false
 }

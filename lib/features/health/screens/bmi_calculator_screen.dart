@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/router/nav.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../models/bmi_profile.dart';
 import '../providers/bmi_profile_provider.dart';
@@ -92,21 +93,19 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
 
   void _goBack() {
     if (_showResult) {
-      setState(() {
-        _showResult = false;
-        _currentStep = _totalSteps - 1;
-      });
-      _animateProgress(_currentStep - 1);
+      go_back_home(context);
       return;
     }
-    if (_currentStep > 0) {
-      setState(() => _currentStep--);
-      _pageController.previousPage(
-        duration: const Duration(milliseconds: 400),
-        curve: Curves.easeInOut,
-      );
-      _animateProgress(_currentStep - 1);
+    if (_currentStep == 0) {
+      pop_or_home(context);
+      return;
     }
+    setState(() => _currentStep--);
+    _pageController.previousPage(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeInOut,
+    );
+    _animateProgress(_currentStep - 1);
   }
 
   @override
@@ -160,26 +159,24 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
               const SizedBox(height: 16),
               Row(
                 children: [
-                  if (_currentStep > 0 || _showResult) ...[
-                    GestureDetector(
-                      onTap: _goBack,
-                      child: Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          color: app.surface,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: app.border),
-                        ),
-                        child: Icon(
-                          Icons.arrow_back_ios_new,
-                          color: on_surface,
-                          size: 16,
-                        ),
+                  GestureDetector(
+                    onTap: _goBack,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: app.surface,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: app.border),
+                      ),
+                      child: Icon(
+                        Icons.arrow_back_ios_new,
+                        color: on_surface,
+                        size: 16,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                  ],
+                  ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       step_title,
@@ -530,6 +527,27 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
 
               const SizedBox(height: 16),
               GestureDetector(
+                onTap: () => go_back_home(context),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  decoration: BoxDecoration(
+                    color: context.app.accent,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: const Text(
+                    'Back to Home',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+              GestureDetector(
                 onTap: () {
                   setState(() {
                     _showResult = false;
@@ -552,10 +570,23 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
                     borderRadius: BorderRadius.circular(16),
                     border: Border.all(color: context.app.border),
                   ),
-                  child: Icon(
-                    Icons.refresh,
-                    color: context.app.accent,
-                    size: 22,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.refresh,
+                        color: context.app.accent,
+                        size: 20,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Recalculate',
+                        style: TextStyle(
+                          color: context.on_surface,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

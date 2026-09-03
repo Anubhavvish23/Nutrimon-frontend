@@ -67,4 +67,17 @@ void main() {
     expect(result, isNotNull);
     expect(result!.recipe.name, 'Vegetable Poha');
   });
+
+  test('banana egg cheese does not mix all three', () {
+    final result = spinFridgeRoulette(
+      recipes: catalog,
+      selected_ids: {'banana', 'eggs', 'cheese'},
+    );
+    expect(result, isNotNull);
+    expect(result!.matched_labels, isNot(contains('Banana')));
+    expect(
+      result!.recipe.name.toLowerCase(),
+      isNot(contains('banana')),
+    );
+  });
 }

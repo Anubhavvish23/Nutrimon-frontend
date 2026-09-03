@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import '../../../core/router/nav.dart';
 import '../data/activity_options.dart';
 import '../data/meal_goal_options.dart';
 import '../providers/meal_preferences_provider.dart';
@@ -69,7 +69,7 @@ class _MealPreferencesScreenState extends ConsumerState<MealPreferencesScreen> {
           gender: _gender!,
           activities: _selected_activities,
         );
-    if (mounted) context.pop(true);
+    if (mounted) pop_or_home(context);
   }
 
   @override
@@ -86,7 +86,7 @@ class _MealPreferencesScreenState extends ConsumerState<MealPreferencesScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
-          onPressed: () => context.pop(),
+          onPressed: () => pop_or_home(context),
         ),
         title: const Text(
           'Meal preferences',

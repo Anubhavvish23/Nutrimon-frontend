@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../core/router/nav.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import '../../../core/widgets/premium/premium_card.dart';
 import '../providers/bmi_profile_provider.dart';
@@ -39,7 +40,7 @@ class HealthCheckHubScreen extends ConsumerWidget {
               Row(
                 children: [
                   GestureDetector(
-                    onTap: () => context.pop(),
+                    onTap: () => pop_or_home(context),
                     child: Container(
                       width: 40,
                       height: 40,

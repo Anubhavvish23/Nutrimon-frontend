@@ -10,7 +10,6 @@ import '../data/recipe_catalog.dart';
 import '../providers/favorites_provider.dart';
 import '../providers/recipes_catalog_provider.dart';
 import '../utils/recipe_card_mapper.dart';
-import '../utils/recipe_tag_utils.dart';
 
 class RecipesScreen extends ConsumerStatefulWidget {
   final bool initial_favorites;

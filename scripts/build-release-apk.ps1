@@ -1,7 +1,7 @@
 param(
     [string]$ApiBaseUrl = "https://nutrimon-backend-production.up.railway.app",
     [string]$UpdateSiteUrl = "https://nutrimon-frontend.vercel.app",
-    [string]$ReleaseMessage = "Allergy-safe meal plans, working daily reminders, and light mode fixes."
+    [string]$ReleaseMessage = "Smarter fridge recipes, home back buttons, and pairing that skips clashing ingredients."
 )
 
 $ErrorActionPreference = "Stop"

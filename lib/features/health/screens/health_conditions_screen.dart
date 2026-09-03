@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
+import '../../../core/router/nav.dart';
 import '../providers/health_profile_provider.dart';
 
 class HealthConditionsScreen extends ConsumerStatefulWidget {
@@ -73,7 +73,7 @@ class _HealthConditionsScreenState extends ConsumerState<HealthConditionsScreen>
           backgroundColor: Color(0xFF1DB954),
         ),
       );
-      context.pop();
+      pop_or_home(context);
     }
   }
 
@@ -94,7 +94,7 @@ class _HealthConditionsScreenState extends ConsumerState<HealthConditionsScreen>
                   Row(
                     children: [
                       GestureDetector(
-                        onTap: () => context.pop(),
+                        onTap: () => pop_or_home(context),
                         child: Container(
                           width: 40,
                           height: 40,
