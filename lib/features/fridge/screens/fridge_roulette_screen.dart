@@ -14,7 +14,6 @@ import '../../plans/providers/meal_preferences_provider.dart';
 import '../../plans/widgets/recipe_sheet_content.dart';
 import '../../recipes/providers/recipes_catalog_provider.dart';
 import '../data/fridge_ingredients.dart';
-import '../providers/fridge_last_picks_provider.dart';
 import '../utils/fridge_ingredient_search.dart';
 import '../utils/fridge_match.dart';
 
@@ -33,7 +32,6 @@ class _FridgeRouletteScreenState extends ConsumerState<FridgeRouletteScreen>
   final Set<String> _selected = {};
   final TextEditingController _search_controller = TextEditingController();
   String _search_query = '';
-  bool _last_picks_applied = false;
   FridgeMatchResult? _result;
   bool _spinning = false;
   String _spin_status = '';
@@ -63,36 +61,10 @@ class _FridgeRouletteScreenState extends ConsumerState<FridgeRouletteScreen>
   }
 
   List<FridgeIngredient> get _filtered_ingredients {
-    return search_fridge_ingredients(_search_query);
-  }
-
-  void _apply_last_picks(List<String> last_picks) {
-    if (_last_picks_applied || last_picks.isEmpty || _selected.isNotEmpty) {
-      return;
-    }
-    _last_picks_applied = true;
-    setState(() {
-      for (final id in last_picks) {
-        if (_selected.length >= _max_picks) break;
-        if (fridgeIngredientOptions.any((item) => item.id == id)) {
-          _selected.add(id);
-        }
-      }
-    });
-  }
-
-  void _use_last_picks(List<String> last_picks) {
-    HapticFeedback.selectionClick();
-    setState(() {
-      _selected.clear();
-      for (final id in last_picks) {
-        if (_selected.length >= _max_picks) break;
-        if (fridgeIngredientOptions.any((item) => item.id == id)) {
-          _selected.add(id);
-        }
-      }
-      _result = null;
-    });
+    return search_fridge_ingredients(
+      _search_query,
+      allergies: ref.watch(healthProfileProvider).allergies,
+    );
   }
 
   List<FridgeIngredient> get _selected_items {
@@ -215,9 +187,6 @@ class _FridgeRouletteScreenState extends ConsumerState<FridgeRouletteScreen>
 
     if (match != null) {
       HapticFeedback.lightImpact();
-      await ref
-          .read(fridgeLastPicksProvider.notifier)
-          .save_picks(_selected.toList());
       await ref.read(microGoalsProvider.notifier).recordEvent('fridge_spin');
     } else {
       HapticFeedback.heavyImpact();
@@ -233,13 +202,8 @@ class _FridgeRouletteScreenState extends ConsumerState<FridgeRouletteScreen>
   @override
   Widget build(BuildContext context) {
     final catalog_async = ref.watch(recipesCatalogProvider);
-    final last_picks = ref.watch(fridgeLastPicksProvider);
-    _apply_last_picks(last_picks);
     final pad = SkeletonResponsive.horizontalPadding(context);
     final filtered = _filtered_ingredients;
-    final last_pick_items = fridgeIngredientOptions
-        .where((item) => last_picks.contains(item.id))
-        .toList();
     final step = _result != null ? 3 : (_selected.length >= 2 ? 2 : 1);
     final app = context.app;
     final on_surface = context.on_surface;
@@ -319,87 +283,6 @@ class _FridgeRouletteScreenState extends ConsumerState<FridgeRouletteScreen>
                       on_remove: _toggle_ingredient,
                     ),
                   ),
-                  if (last_pick_items.isNotEmpty) ...[
-                    const SizedBox(height: 10),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: pad),
-                      child: Row(
-                        children: [
-                          const Text(
-                            'LAST SPIN',
-                            style: TextStyle(
-                              color: Color(0xFF666666),
-                              fontSize: 11,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                          const Spacer(),
-                          TextButton(
-                            onPressed: () => _use_last_picks(last_picks),
-                            child: const Text(
-                              'Use again',
-                              style: TextStyle(
-                                color: Color(0xFF1DB954),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    SizedBox(
-                      height: 38,
-                      child: ListView.separated(
-                        padding: EdgeInsets.symmetric(horizontal: pad),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: last_pick_items.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 8),
-                        itemBuilder: (context, index) {
-                          final item = last_pick_items[index];
-                          final is_on = _selected.contains(item.id);
-                          return GestureDetector(
-                            onTap: () => _toggle_ingredient(item.id),
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 8,
-                              ),
-                              decoration: BoxDecoration(
-                                color: is_on
-                                    ? const Color(0xFF0D3320)
-                                    : const Color(0xFF141414),
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(
-                                  color: is_on
-                                      ? const Color(0xFF1DB954)
-                                      : const Color(0xFF2A2A2A),
-                                ),
-                              ),
-                              child: Row(
-                                children: [
-                                  Text(item.emoji),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    item.label,
-                                    style: TextStyle(
-                                      color: is_on
-                                          ? Colors.white
-                                          : const Color(0xFFAAAAAA),
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                  ],
                   const SizedBox(height: 12),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: pad),

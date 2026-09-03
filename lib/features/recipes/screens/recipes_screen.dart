@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme_extension.dart';
+import '../../../core/theme/recipe_surface_colors.dart';
 import '../../../core/widgets/empty_state_view.dart';
 import '../../plans/models/recipe.dart';
 import '../../plans/widgets/recipe_sheet_content.dart';
@@ -536,11 +537,11 @@ class _RecipeCardState extends State<_RecipeCard> {
     final recipe = widget.recipe;
     final app = context.app;
     final is_dark = context.is_dark_mode;
-    final card_bg = is_dark
-        ? recipe['bg'] as Color
-        : Color.lerp(recipe['bg'] as Color, Colors.white, 0.55)!;
-    final title_color = is_dark ? Colors.white : const Color(0xFF1A1A1A);
+    final accent = recipe['border'] as Color;
+    final card_bg = recipe_surface_background(recipe['bg'] as Color, is_dark);
+    final title_color = recipe_surface_title_color(is_dark);
     final meta_color = is_dark ? const Color(0xFF888888) : app.text_muted;
+    final border_color = recipe_surface_border(accent, is_dark);
     return GestureDetector(
       onTap: widget.onTap,
       onTapDown: (_) => setState(() => _scale = 0.95),
@@ -554,12 +555,12 @@ class _RecipeCardState extends State<_RecipeCard> {
           decoration: BoxDecoration(
             color: card_bg,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: (recipe['border'] as Color).withOpacity(0.4),
-            ),
+            border: Border.all(color: border_color),
             boxShadow: [
               BoxShadow(
-                color: (recipe['border'] as Color).withOpacity(0.1),
+                color: is_dark
+                    ? accent.withValues(alpha: 0.1)
+                    : Colors.black.withValues(alpha: 0.06),
                 blurRadius: 10,
                 spreadRadius: 1,
               ),
@@ -616,7 +617,7 @@ class _RecipeCardState extends State<_RecipeCard> {
                               key: ValueKey(widget.isFavorite),
                               color: widget.isFavorite
                                   ? const Color(0xFFFF375F)
-                                  : const Color(0xFF555555),
+                                  : app.text_muted,
                               size: 18,
                             ),
                           ),
@@ -660,7 +661,10 @@ class _RecipeCardState extends State<_RecipeCard> {
                                       child: Text(
                                         tag['label'],
                                         style: TextStyle(
-                                          color: tag['color'],
+                                          color: recipe_surface_tag_text(
+                                            tag['color'] as Color,
+                                            is_dark,
+                                          ),
                                           fontSize: 8,
                                           fontWeight: FontWeight.bold,
                                         ),
@@ -709,13 +713,10 @@ class _RecipeCardState extends State<_RecipeCard> {
                     width: double.infinity,
                     padding: const EdgeInsets.symmetric(vertical: 5),
                     decoration: BoxDecoration(
-                      color: is_dark
-                          ? Colors.black26
-                          : Colors.white.withValues(alpha: 0.65),
+                      color: recipe_surface_action_background(is_dark),
                       borderRadius: BorderRadius.circular(10),
                       border: Border.all(
-                        color:
-                            (recipe['border'] as Color).withOpacity(0.25),
+                        color: accent.withValues(alpha: 0.25),
                       ),
                     ),
                     child: Row(
@@ -724,14 +725,17 @@ class _RecipeCardState extends State<_RecipeCard> {
                         Text(
                           'View Recipe',
                           style: TextStyle(
-                            color: recipe['border'],
+                            color: recipe_surface_tag_text(accent, is_dark),
                             fontSize: 11,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
                         const SizedBox(width: 4),
-                        Icon(Icons.arrow_forward_ios,
-                            color: recipe['border'] as Color, size: 10),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          color: recipe_surface_tag_text(accent, is_dark),
+                          size: 10,
+                        ),
                       ],
                     ),
                   ),

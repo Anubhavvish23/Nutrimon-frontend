@@ -95,12 +95,9 @@ String _recipe_blob(Recipe recipe) {
   ].join(' ').toLowerCase();
 }
 
-bool recipe_conflicts_with_allergies(
-  Recipe recipe,
-  List<String> allergies,
-) {
+bool text_conflicts_with_allergies(String text, List<String> allergies) {
   if (allergies.isEmpty) return false;
-  final blob = _recipe_blob(recipe);
+  final blob = text.toLowerCase();
   for (final allergy in allergies) {
     final key = allergy.trim().toLowerCase();
     if (key.isEmpty) continue;
@@ -110,6 +107,13 @@ bool recipe_conflicts_with_allergies(
     }
   }
   return false;
+}
+
+bool recipe_conflicts_with_allergies(
+  Recipe recipe,
+  List<String> allergies,
+) {
+  return text_conflicts_with_allergies(_recipe_blob(recipe), allergies);
 }
 
 bool recipe_conflicts_with_conditions(

@@ -1,6 +1,7 @@
 param(
     [string]$ApiBaseUrl = "https://nutrimon-backend-production.up.railway.app",
-    [string]$UpdateSiteUrl = "https://nutrimon-frontend.vercel.app"
+    [string]$UpdateSiteUrl = "https://nutrimon-frontend.vercel.app",
+    [string]$ReleaseMessage = "Allergy-safe meal plans, working daily reminders, and light mode fixes."
 )
 
 $ErrorActionPreference = "Stop"
@@ -24,7 +25,7 @@ $version_json = @{
     latest_version = $version_name
     build_number = $build_number
     apk_url = "downloads/nutrimorning.apk"
-    message = "Bug fixes and performance improvements."
+    message = $ReleaseMessage
     force_update = $false
 } | ConvertTo-Json
 

@@ -1237,7 +1237,10 @@ class _MealCardState extends State<_MealCard> {
                               child: Text(
                                 tag.label,
                                 style: TextStyle(
-                                  color: tag.color,
+                                  color: recipe_surface_tag_text(
+                                    tag.color,
+                                    is_dark,
+                                  ),
                                   fontSize: 8,
                                   fontWeight: FontWeight.bold,
                                 ),

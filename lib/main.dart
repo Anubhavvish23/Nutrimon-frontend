@@ -70,7 +70,7 @@ class _NutriMorningAppState extends ConsumerState<NutriMorningApp>
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       ApiService.ensureFreshAccessToken();
-      NotificationService.reschedule_daily_reminders();
+      NotificationService.ensure_reminders_scheduled();
       _check_update_on_resume();
     }
   }

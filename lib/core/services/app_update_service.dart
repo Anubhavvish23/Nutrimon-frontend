@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -22,7 +23,7 @@ class AppUpdateInfo {
 
   factory AppUpdateInfo.from_json(Map<String, dynamic> json) {
     return AppUpdateInfo(
-      latest_version: json['latest_version']?.toString() ?? '0.0.0',
+      latest_version: json['latest_version']?.toString() ?? '',
       build_number: int.tryParse(json['build_number']?.toString() ?? '') ?? 0,
       apk_url: json['apk_url']?.toString() ?? '',
       message: json['message']?.toString() ?? 'A new version is available.',
@@ -36,11 +37,28 @@ class AppUpdateService {
 
   static Future<AppUpdateInfo?> check_for_update() async {
     final package = await PackageInfo.fromPlatform();
-    final current_build = int.tryParse(package.buildNumber) ?? 0;
+    final current_build = int.tryParse(package.buildNumber.trim()) ?? 0;
+
+    if (current_build <= 0) {
+      debugPrint('Update check skipped: unknown local build '
+          '"${package.buildNumber}"');
+      return null;
+    }
 
     final remote = await _fetch_remote();
     if (remote == null) return null;
+
+    if (remote.build_number <= 0) {
+      debugPrint('Update check skipped: invalid remote build number');
+      return null;
+    }
     if (remote.build_number <= current_build) return null;
+
+    if (!is_newer_version(remote.latest_version, package.version)) {
+      debugPrint('Update check skipped: remote version '
+          '"${remote.latest_version}" is not newer than "${package.version}"');
+      return null;
+    }
 
     if (!remote.force_update) {
       final prefs = await SharedPreferences.getInstance();
@@ -49,6 +67,34 @@ class AppUpdateService {
     }
 
     return remote;
+  }
+
+  static bool is_newer_version(String remote_version, String current_version) {
+    final remote = _parse_version(remote_version);
+    final current = _parse_version(current_version);
+    if (remote.isEmpty || current.isEmpty) return true;
+
+    final length = remote.length > current.length ? remote.length : current.length;
+    for (var i = 0; i < length; i++) {
+      final remote_part = i < remote.length ? remote[i] : 0;
+      final current_part = i < current.length ? current[i] : 0;
+      if (remote_part != current_part) return remote_part > current_part;
+    }
+    return false;
+  }
+
+  static List<int> _parse_version(String value) {
+    final trimmed = value.split('+').first.trim();
+    if (trimmed.isEmpty) return const [];
+
+    final parts = trimmed.split('.');
+    final numbers = <int>[];
+    for (final part in parts) {
+      final digits = RegExp(r'\d+').firstMatch(part)?.group(0);
+      if (digits == null) return const [];
+      numbers.add(int.parse(digits));
+    }
+    return numbers;
   }
 
   static Future<void> dismiss_update(int build_number) async {

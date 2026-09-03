@@ -1,7 +1,7 @@
 {
-  "latest_version": "1.0.1",
-  "build_number": 2,
+  "message": "Allergy-safe meal plans, working daily reminders, and light mode fixes.",
+  "force_update": false,
   "apk_url": "downloads/nutrimorning.apk",
-  "message": "Notifications fix, faster startup, and in-app update alerts.",
-  "force_update": false
+  "latest_version": "1.0.1",
+  "build_number": 2
 }

@@ -6,7 +6,6 @@ import '../../features/health/providers/health_profile_provider.dart';
 import '../../features/health/providers/selected_symptoms_provider.dart';
 import '../../features/health/providers/symptom_analysis_provider.dart';
 import '../../features/health/providers/symptom_timeline_provider.dart';
-import '../../features/fridge/providers/fridge_last_picks_provider.dart';
 import '../../features/plans/providers/meal_preferences_provider.dart';
 import '../../features/plans/providers/recipe_ratings_provider.dart';
 import '../../features/plans/providers/saved_meal_plan_provider.dart';
@@ -29,7 +28,6 @@ Future<void> clearLocalUserData(WidgetRef ref) async {
     ref.read(symptomTimelineProvider.notifier).clearLocal(),
     ref.read(microGoalsProvider.notifier).clearLocal(),
     ref.read(recipeRatingsProvider.notifier).clearLocal(),
-    ref.read(fridgeLastPicksProvider.notifier).clearLocal(),
     ref.read(groceryCheckedProvider.notifier).clearLocal(),
   ]);
 }

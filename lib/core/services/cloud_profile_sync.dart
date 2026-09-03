@@ -8,7 +8,6 @@ import '../../features/health/providers/symptom_analysis_provider.dart';
 import '../../features/health/providers/symptom_timeline_provider.dart';
 import '../../features/goals/providers/micro_goals_provider.dart';
 import '../../features/grocery/providers/grocery_checked_provider.dart';
-import '../../features/fridge/providers/fridge_last_picks_provider.dart';
 import '../../features/plans/providers/meal_preferences_provider.dart';
 import '../../features/plans/providers/saved_meal_plan_provider.dart';
 import '../../features/recipes/providers/favorites_provider.dart';
@@ -127,9 +126,6 @@ Future<void> loadCloudUserProfile(
       sync_cloud: false,
     );
   }
-
-  final fridge_picks = _asStringList(profile['fridge_last_picks']);
-  await read(fridgeLastPicksProvider.notifier).applyFromCloud(fridge_picks);
 
   final grocery_checked = _asStringList(profile['grocery_checked']);
   await read(groceryCheckedProvider.notifier).applyFromCloud(grocery_checked);

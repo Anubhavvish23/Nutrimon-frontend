@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'notification_service.dart';
 
 class AppStartup {
@@ -17,6 +18,12 @@ class AppStartup {
 
   static Future<void> _run() async {
     try {
+      await _clear_retired_keys();
+    } catch (e) {
+      debugPrint('Retired key cleanup failed: $e');
+    }
+
+    try {
       await NotificationService.initialize();
     } catch (e) {
       debugPrint('App startup init failed: $e');
@@ -25,5 +32,10 @@ class AppStartup {
         _ready.complete();
       }
     }
+  }
+
+  static Future<void> _clear_retired_keys() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('fridge_last_picks');
   }
 }
