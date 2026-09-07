@@ -27,6 +27,7 @@ import '../widgets/error/app_error_screen.dart';
 import '../widgets/main_shell.dart';
 import '../services/cloud_profile_bootstrap.dart';
 import '../../features/plans/providers/meal_preferences_provider.dart';
+import '../providers/onboarding_bmi_gate_provider.dart';
 import 'app_page_transitions.dart';
 import 'router_refresh_notifier.dart';
 
@@ -34,6 +35,7 @@ String? _resolve_redirect({
   required AuthStatus authState,
   required MealPreferencesState meal_prefs,
   required bool cloud_loaded,
+  required bool bmi_in_progress,
   required String location,
 }) {
   final is_loading = authState == AuthStatus.loading;
@@ -60,7 +62,12 @@ String? _resolve_redirect({
   if (is_authed && needs_onboarding && !is_onboarding && !is_bmi) {
     return '/onboarding';
   }
-  if (is_authed && !needs_onboarding && is_onboarding) return '/home';
+  if (is_authed &&
+      !needs_onboarding &&
+      is_onboarding &&
+      !bmi_in_progress) {
+    return '/home';
+  }
   if (is_authed && is_auth_route) {
     return needs_onboarding ? '/onboarding' : '/home';
   }
@@ -90,6 +97,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         authState: ref.read(authProvider),
         meal_prefs: ref.read(mealPreferencesProvider),
         cloud_loaded: ref.read(cloudProfileLoadedProvider),
+        bmi_in_progress: ref.read(onboardingBmiInProgressProvider),
         location: state.matchedLocation,
       );
     },

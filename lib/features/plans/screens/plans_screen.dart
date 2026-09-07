@@ -45,6 +45,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
   bool _initial_bmi_animated = false;
   String? _last_scrolled_section;
   bool _preferences_prompt_scheduled = false;
+  bool _bmi_prompt_scheduled = false;
   String? _meals_prefs_key;
   bool _generating_plan = false;
   int? _swapping_index;
@@ -436,6 +437,42 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
     _syncMealsToPreferences(ref.read(mealPreferencesProvider));
   }
 
+  Future<void> _prompt_bmi_if_needed() async {
+    final profile = ref.read(bmiProfileProvider);
+    if (profile.is_calculated || !mounted) return;
+    final app = context.app;
+    final on_surface = context.on_surface;
+    final go_calculate = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialog_context) {
+        return AlertDialog(
+          backgroundColor: app.surface,
+          title: Text(
+            'Calculate your BMI',
+            style: TextStyle(color: on_surface, fontWeight: FontWeight.w700),
+          ),
+          content: Text(
+            'Your meal plan uses BMI for portion size. Add it now, or you can do it later from this tab.',
+            style: TextStyle(color: app.text_muted, height: 1.45),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialog_context).pop(false),
+              child: Text('Later', style: TextStyle(color: app.text_muted)),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(dialog_context).pop(true),
+              child: const Text('Calculate BMI'),
+            ),
+          ],
+        );
+      },
+    );
+    if (!mounted || go_calculate != true) return;
+    await context.push('/bmi');
+  }
+
   void _scrollToSection(String section) {
     final key = section == 'bmi'
         ? _bmi_section_key
@@ -531,12 +568,11 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
     }
 
     final profile = ref.watch(bmiProfileProvider);
-    final bmi = profile.display_bmi;
 
-    if (!_initial_bmi_animated) {
+    if (!_initial_bmi_animated && profile.is_calculated) {
       _initial_bmi_animated = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) _animateBmiBar(bmi);
+        if (mounted) _animateBmiBar(profile.bmi);
       });
     }
 
@@ -560,7 +596,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
                     child: const PlansListSkeleton(),
                   ),
                 ),
-                builder: (_) => _buildContent(bmi),
+                builder: (_) => _buildContent(profile),
               );
             },
           ),
@@ -569,7 +605,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
     );
   }
 
-  Widget _buildContent(double bmi) {
+  Widget _buildContent(BmiProfile profile) {
     final meal_prefs = ref.watch(mealPreferencesProvider);
     final app = context.app;
     final on_surface = context.on_surface;
@@ -578,6 +614,15 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
       _preferences_prompt_scheduled = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (mounted) _handlePreferencesFlow();
+      });
+    }
+
+    if (meal_prefs.has_completed_setup &&
+        !profile.is_calculated &&
+        !_bmi_prompt_scheduled) {
+      _bmi_prompt_scheduled = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _prompt_bmi_if_needed();
       });
     }
 
@@ -598,7 +643,7 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
                 const SizedBox(height: 20),
                 KeyedSubtree(
                   key: _bmi_section_key,
-                  child: _buildBMICard(bmi),
+                  child: _buildBMICard(profile),
                 ),
                 const SizedBox(height: 24),
                 _buildDaySelector(),
@@ -782,12 +827,64 @@ class _PlansScreenState extends ConsumerState<PlansScreen>
     );
   }
 
-  Widget _buildBMICard(double bmi) {
-    final bmi_color = bmiColorFor(bmi);
-    final bmi_label = bmiLabelFor(bmi);
-
+  Widget _buildBMICard(BmiProfile profile) {
     final app = context.app;
     final on_surface = Theme.of(context).colorScheme.onSurface;
+
+    if (!profile.is_calculated) {
+      return PremiumCard(
+        padding: const EdgeInsets.all(20),
+        on_tap: () => context.push('/bmi'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'BMI',
+              style: TextStyle(
+                color: app.text_muted,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Not calculated yet',
+              style: TextStyle(
+                color: on_surface,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Add height and weight so we can size portions for your plan.',
+              style: TextStyle(color: app.text_muted, fontSize: 13, height: 1.4),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              decoration: BoxDecoration(
+                color: app.accent,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: const Text(
+                'Calculate BMI',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final bmi = profile.bmi;
+    final bmi_color = bmiColorFor(bmi);
+    final bmi_label = bmiLabelFor(bmi);
 
     return PremiumCard(
       padding: const EdgeInsets.all(20),

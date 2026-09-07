@@ -15,14 +15,11 @@ class BmiProfile {
     this.is_calculated = false,
   });
 
-  static const fallback_bmi = 22.4;
-
   double get bmi {
     final h = height_cm / 100;
+    if (h <= 0) return 0;
     return weight_kg / (h * h);
   }
-
-  double get display_bmi => is_calculated ? bmi : fallback_bmi;
 }
 
 String bmiLabelFor(double bmi) {

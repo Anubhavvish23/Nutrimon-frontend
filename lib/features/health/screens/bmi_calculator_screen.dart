@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/router/nav.dart';
 import '../../../core/theme/app_theme_extension.dart';
+import '../../plans/providers/meal_preferences_provider.dart';
 import '../models/bmi_profile.dart';
 import '../providers/bmi_profile_provider.dart';
 import '../widgets/value_stepper_picker.dart';
@@ -30,6 +32,12 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
   int _currentStep = 0;
   final int _totalSteps = 4;
   bool _showResult = false;
+  bool _saving = false;
+
+  bool get _from_onboarding {
+    return GoRouterState.of(context).uri.queryParameters['from'] ==
+        'onboarding';
+  }
 
   static const List<String> _step_titles = [
     'Which team are you on? 👤',
@@ -63,7 +71,7 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
     );
   }
 
-  void _goToNext() {
+  Future<void> _goToNext() async {
     if (_currentStep < _totalSteps - 1) {
       setState(() => _currentStep++);
       _pageController.nextPage(
@@ -71,29 +79,41 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
         curve: Curves.easeInOut,
       );
       _animateProgress(_currentStep);
-    } else {
-      ref.read(bmiProfileProvider.notifier).saveFromCalculator(
-            gender: _gender!,
-            age: _age,
-            height_cm: _height,
-            weight_kg: _weight,
-          );
-      _cardController.forward();
-      setState(() {
-        _showResult = true;
-        _currentStep = _totalSteps;
-      });
-      _progressController.animateTo(
-        1.0,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeOut,
-      );
+      return;
     }
+    if (_gender == null || _saving) return;
+    setState(() => _saving = true);
+    await ref.read(bmiProfileProvider.notifier).saveFromCalculator(
+          gender: _gender!,
+          age: _age,
+          height_cm: _height,
+          weight_kg: _weight,
+        );
+    if (!mounted) return;
+    _cardController.forward();
+    setState(() {
+      _saving = false;
+      _showResult = true;
+      _currentStep = _totalSteps;
+    });
+    _progressController.animateTo(
+      1.0,
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeOut,
+    );
+  }
+
+  void _finish_bmi() {
+    if (_from_onboarding && context.canPop()) {
+      context.pop();
+      return;
+    }
+    go_back_home(context);
   }
 
   void _goBack() {
     if (_showResult) {
-      go_back_home(context);
+      _finish_bmi();
       return;
     }
     if (_currentStep == 0) {
@@ -111,6 +131,10 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
   @override
   void initState() {
     super.initState();
+    final prefs_gender = ref.read(mealPreferencesProvider).gender;
+    if (prefs_gender != null && prefs_gender.isNotEmpty) {
+      _gender = prefs_gender;
+    }
 
     _progressController = AnimationController(
       vsync: this,
@@ -527,7 +551,7 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
 
               const SizedBox(height: 16),
               GestureDetector(
-                onTap: () => go_back_home(context),
+                onTap: _finish_bmi,
                 child: Container(
                   width: double.infinity,
                   padding: const EdgeInsets.symmetric(vertical: 16),
@@ -535,8 +559,8 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
                     color: context.app.accent,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Text(
-                    'Back to Home',
+                  child: Text(
+                    _from_onboarding ? 'Continue' : 'Back to Home',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Colors.white,
@@ -628,7 +652,8 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
   }
 
   Widget _buildNextButton() {
-    final canProceed = _currentStep == 0 ? _gender != null : true;
+    final canProceed =
+        !_saving && (_currentStep == 0 ? _gender != null : true);
     final app = context.app;
     return GestureDetector(
       onTap: canProceed ? _goToNext : null,
@@ -656,7 +681,9 @@ class _BMICalculatorScreenState extends ConsumerState<BMICalculatorScreen>
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              _currentStep == _totalSteps - 1 ? 'Done' : 'Next',
+              _saving
+                  ? 'Calculating...'
+                  : (_currentStep == _totalSteps - 1 ? 'Calculate BMI' : 'Next'),
               style: TextStyle(
                 color: canProceed ? Colors.white : app.text_muted,
                 fontSize: 16,

@@ -38,7 +38,7 @@ final plansDataProvider = FutureProvider<PlansData>((ref) async {
   final bmi = ref.watch(bmiProfileProvider);
   final saved = ref.watch(savedMealPlanProvider);
   return PlansData(
-    bmi: bmi.display_bmi,
+    bmi: bmi.is_calculated ? bmi.bmi : 0,
     meal_count: saved.recipes.isNotEmpty ? saved.recipes.length : 4,
   );
 });

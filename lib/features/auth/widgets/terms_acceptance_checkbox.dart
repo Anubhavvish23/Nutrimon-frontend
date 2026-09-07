@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme_extension.dart';
 import 'terms_and_conditions_sheet.dart';
 
-class TermsAcceptanceCheckbox extends StatelessWidget {
+class TermsAcceptanceCheckbox extends StatefulWidget {
   final bool value;
   final ValueChanged<bool> on_changed;
 
@@ -12,6 +12,34 @@ class TermsAcceptanceCheckbox extends StatelessWidget {
     required this.value,
     required this.on_changed,
   });
+
+  @override
+  State<TermsAcceptanceCheckbox> createState() =>
+      _TermsAcceptanceCheckboxState();
+}
+
+class _TermsAcceptanceCheckboxState extends State<TermsAcceptanceCheckbox> {
+  bool _reading = false;
+  TapGestureRecognizer? _terms_recognizer;
+
+  @override
+  void initState() {
+    super.initState();
+    _terms_recognizer = TapGestureRecognizer()..onTap = _open_terms;
+  }
+
+  @override
+  void dispose() {
+    _terms_recognizer?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _open_terms() async {
+    if (_reading) return;
+    setState(() => _reading = true);
+    await showTermsAndConditionsSheet(context);
+    if (mounted) setState(() => _reading = false);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,8 +52,8 @@ class TermsAcceptanceCheckbox extends StatelessWidget {
           width: 24,
           height: 24,
           child: Checkbox(
-            value: value,
-            onChanged: (checked) => on_changed(checked ?? false),
+            value: widget.value,
+            onChanged: (checked) => widget.on_changed(checked ?? false),
             activeColor: app.accent,
             side: BorderSide(color: app.border),
             materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -34,7 +62,7 @@ class TermsAcceptanceCheckbox extends StatelessWidget {
         const SizedBox(width: 10),
         Expanded(
           child: GestureDetector(
-            onTap: () => on_changed(!value),
+            onTap: () => widget.on_changed(!widget.value),
             child: RichText(
               text: TextSpan(
                 style: TextStyle(
@@ -47,14 +75,13 @@ class TermsAcceptanceCheckbox extends StatelessWidget {
                     text: 'I have read and agree to the ',
                   ),
                   TextSpan(
-                    text: 'Terms & Conditions',
+                    text: _reading ? 'Loading terms…' : 'Terms & Conditions',
                     style: TextStyle(
                       color: app.accent,
                       fontWeight: FontWeight.w700,
                       decoration: TextDecoration.underline,
                     ),
-                    recognizer: TapGestureRecognizer()
-                      ..onTap = () => showTermsAndConditionsSheet(context),
+                    recognizer: _terms_recognizer,
                   ),
                   const TextSpan(
                     text:

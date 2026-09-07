@@ -5,6 +5,7 @@ import '../../features/plans/data/activity_options.dart';
 import '../../features/plans/data/meal_goal_options.dart';
 import '../../features/plans/providers/meal_preferences_provider.dart';
 import '../config/app_brand.dart';
+import '../providers/onboarding_bmi_gate_provider.dart';
 import '../widgets/app_logo.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -70,14 +71,19 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         _selected_activities.isEmpty) {
       return;
     }
-    await ref.read(mealPreferencesProvider.notifier).saveAll(
-          diet_type: _diet_type!,
-          meal_goals: _selected_goals,
-          gender: _gender!,
-          activities: _selected_activities,
-        );
-    if (!mounted) return;
-    await context.push('/bmi');
+    ref.read(onboardingBmiInProgressProvider.notifier).state = true;
+    try {
+      await ref.read(mealPreferencesProvider.notifier).saveAll(
+            diet_type: _diet_type!,
+            meal_goals: _selected_goals,
+            gender: _gender!,
+            activities: _selected_activities,
+          );
+      if (!mounted) return;
+      await context.push('/bmi?from=onboarding');
+    } finally {
+      ref.read(onboardingBmiInProgressProvider.notifier).state = false;
+    }
     if (!mounted) return;
     context.go('/home');
   }
@@ -429,7 +435,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           ),
           const SizedBox(height: 12),
           const Text(
-            'Optional — helps tailor portion sizes on your Plans tab.',
+            'Helps tailor portion sizes on your Plans tab. You can skip and add it later.',
             textAlign: TextAlign.center,
             style: TextStyle(
               color: Color(0xFF888888),
