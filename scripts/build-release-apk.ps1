@@ -1,7 +1,7 @@
 param(
     [string]$ApiBaseUrl = "https://nutrimon-backend-production.up.railway.app",
     [string]$UpdateSiteUrl = "https://nutrimon-frontend.vercel.app",
-    [string]$ReleaseMessage = "BMI onboarding fix, custom health history, meal-timer confirmation, and a shared download counter."
+    [string]$ReleaseMessage = "BMI calculator flow, no fake 22.4 default, Plans BMI prompt, extra symptoms, and terms loading."
 )
 
 $ErrorActionPreference = "Stop"

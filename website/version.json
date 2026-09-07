@@ -1,7 +1,7 @@
 ﻿{
-    "build_number":  4,
-    "message":  "BMI onboarding fix, custom health history, meal-timer confirmation, and a shared download counter.",
+    "build_number":  5,
+    "message":  "BMI calculator flow, no fake 22.4 default, Plans BMI prompt, extra symptoms, and terms loading.",
     "apk_url":  "downloads/nutrimorning.apk",
     "force_update":  false,
-    "latest_version":  "1.0.3"
+    "latest_version":  "1.0.4"
 }
