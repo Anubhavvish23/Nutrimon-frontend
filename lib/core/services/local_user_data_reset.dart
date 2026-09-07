@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../features/auth/providers/terms_acceptance_provider.dart';
 import '../../features/goals/providers/micro_goals_provider.dart';
 import '../../features/grocery/providers/grocery_checked_provider.dart';
 import '../../features/health/providers/bmi_profile_provider.dart';
+import '../../features/health/providers/custom_symptom_history_provider.dart';
 import '../../features/health/providers/health_profile_provider.dart';
 import '../../features/health/providers/selected_symptoms_provider.dart';
 import '../../features/health/providers/symptom_analysis_provider.dart';
@@ -26,8 +28,10 @@ Future<void> clearLocalUserData(WidgetRef ref) async {
     ref.read(streakProvider.notifier).clearLocal(),
     ref.read(favoritesProvider.notifier).clearLocal(),
     ref.read(symptomTimelineProvider.notifier).clearLocal(),
+    ref.read(customSymptomHistoryProvider.notifier).clearLocal(),
     ref.read(microGoalsProvider.notifier).clearLocal(),
     ref.read(recipeRatingsProvider.notifier).clearLocal(),
     ref.read(groceryCheckedProvider.notifier).clearLocal(),
+    ref.read(termsAcceptedProvider.notifier).clearLocal(),
   ]);
 }

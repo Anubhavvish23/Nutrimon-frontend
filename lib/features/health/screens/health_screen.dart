@@ -9,6 +9,7 @@ import '../../../core/widgets/empty_state_view.dart';
 import '../models/bmi_profile.dart';
 import '../models/symptom_catalog_item.dart';
 import '../providers/bmi_profile_provider.dart';
+import '../providers/custom_symptom_history_provider.dart';
 import '../providers/health_profile_provider.dart';
 import '../providers/selected_symptoms_provider.dart';
 import '../providers/symptom_analysis_provider.dart';
@@ -304,7 +305,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
                 crossAxisCount: 2,
                 crossAxisSpacing: 12,
                 mainAxisSpacing: 12,
-                childAspectRatio: 1.1,
+                mainAxisExtent: 168,
               ),
             ),
           ),
@@ -672,6 +673,11 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
     );
     ref.read(symptomAnalysisProvider.notifier).state = analysis;
     await ref.read(symptomTimelineProvider.notifier).addFromAnalysis(analysis);
+    if (trimmed_custom.isNotEmpty) {
+      await ref
+          .read(customSymptomHistoryProvider.notifier)
+          .add_from_analysis(analysis);
+    }
 
     await ApiService.saveUserProfile({
       'last_symptom_analysis': {
@@ -727,6 +733,7 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
   Widget _buildAddCustomTab() {
     final app = context.app;
     final on_surface = context.on_surface;
+    final history = ref.watch(customSymptomHistoryProvider);
     return ListView(
       padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
       children: [
@@ -772,7 +779,95 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
                 },
           child: Text(_analyzing ? 'Analyzing...' : 'Analyze custom symptom'),
         ),
+        if (history.isNotEmpty) ...[
+          const SizedBox(height: 28),
+          Text(
+            'Previous custom checks',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Tap a card to open its last response.',
+            style: TextStyle(color: app.text_muted, fontSize: 13),
+          ),
+          const SizedBox(height: 12),
+          ...history.map((item) => _build_custom_history_card(item)),
+        ],
       ],
+    );
+  }
+
+  Widget _build_custom_history_card(CustomSymptomHistoryItem item) {
+    final app = context.app;
+    final on_surface = context.on_surface;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 10),
+      decoration: BoxDecoration(
+        color: app.surface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: app.border),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          ref.read(symptomAnalysisProvider.notifier).state = item.analysis;
+          _custom_symptom_controller.text = item.custom_text;
+          _go_to_results_tab();
+        },
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(14, 12, 6, 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('📝', style: TextStyle(fontSize: 22)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      item.custom_text,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: on_surface,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      item.analysis.analysis,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: app.text_muted,
+                        fontSize: 12,
+                        height: 1.35,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              IconButton(
+                tooltip: 'Delete',
+                onPressed: () async {
+                  await ref
+                      .read(customSymptomHistoryProvider.notifier)
+                      .remove(item.id);
+                },
+                icon: Icon(
+                  Icons.close,
+                  size: 18,
+                  color: app.text_muted,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -846,56 +941,55 @@ class _HealthScreenState extends ConsumerState<HealthScreen>
           ...analysis.meal_suggestions.map(
             (meal) => Container(
               width: double.infinity,
-              margin: const EdgeInsets.only(bottom: 10),
-              padding: const EdgeInsets.all(14),
+              margin: const EdgeInsets.only(bottom: 12),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: app.surface,
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: app.border),
               ),
-              child: Row(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(meal.emoji, style: const TextStyle(fontSize: 28)),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
+                  Row(
+                    children: [
+                      Text(meal.emoji, style: const TextStyle(fontSize: 28)),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
                           meal.name,
                           style: TextStyle(
                             color: on_surface,
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            height: 1.25,
                           ),
                         ),
-                        if (meal.calories.isNotEmpty || meal.protein.isNotEmpty) ...[
-                          const SizedBox(height: 4),
-                          Text(
-                            [
-                              if (meal.calories.isNotEmpty) meal.calories,
-                              if (meal.protein.isNotEmpty) meal.protein,
-                            ].join(' · '),
-                            style: TextStyle(
-                              color: app.text_muted,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ],
-                        const SizedBox(height: 6),
-                        Text(
-                          meal.action_text.isNotEmpty
-                              ? meal.action_text
-                              : 'Resolve it sooner by consuming ${meal.name} this morning.',
-                          style: const TextStyle(
-                            color: Color(0xFF1DB954),
-                            fontSize: 13,
-                            height: 1.35,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  if (meal.calories.isNotEmpty || meal.protein.isNotEmpty) ...[
+                    const SizedBox(height: 8),
+                    Text(
+                      [
+                        if (meal.calories.isNotEmpty) meal.calories,
+                        if (meal.protein.isNotEmpty) meal.protein,
+                      ].join(' · '),
+                      style: TextStyle(
+                        color: app.text_muted,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  Text(
+                    meal.action_text.isNotEmpty
+                        ? meal.action_text
+                        : 'Resolve it sooner by consuming ${meal.name} this morning.',
+                    style: TextStyle(
+                      color: on_surface.withValues(alpha: 0.85),
+                      fontSize: 14,
+                      height: 1.4,
                     ),
                   ),
                 ],

@@ -1,7 +1,7 @@
-{
-  "latest_version": "1.0.2",
-  "apk_url": "downloads/nutrimorning.apk",
-  "message": "Smarter fridge recipes, home back buttons, and pairing that skips clashing ingredients.",
-  "build_number": 3,
-  "force_update": false
+﻿{
+    "build_number":  4,
+    "message":  "BMI onboarding fix, custom health history, meal-timer confirmation, and a shared download counter.",
+    "apk_url":  "downloads/nutrimorning.apk",
+    "force_update":  false,
+    "latest_version":  "1.0.3"
 }

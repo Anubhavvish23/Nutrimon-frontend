@@ -1,7 +1,7 @@
 param(
     [string]$ApiBaseUrl = "https://nutrimon-backend-production.up.railway.app",
     [string]$UpdateSiteUrl = "https://nutrimon-frontend.vercel.app",
-    [string]$ReleaseMessage = "Smarter fridge recipes, home back buttons, and pairing that skips clashing ingredients."
+    [string]$ReleaseMessage = "BMI onboarding fix, custom health history, meal-timer confirmation, and a shared download counter."
 )
 
 $ErrorActionPreference = "Stop"

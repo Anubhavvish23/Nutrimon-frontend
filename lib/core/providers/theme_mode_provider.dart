@@ -20,8 +20,11 @@ class ThemeModeNotifier extends Notifier<ThemeMode> {
     final stored = prefs.getString(_storage_key);
     if (stored == 'light') {
       state = ThemeMode.light;
-    } else {
-      state = ThemeMode.dark;
+      return;
+    }
+    state = ThemeMode.dark;
+    if (stored != 'dark') {
+      await prefs.setString(_storage_key, 'dark');
     }
   }
 

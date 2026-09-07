@@ -44,12 +44,26 @@ class TermsAcceptanceNotifier extends Notifier<bool> {
     String? terms_accepted_at,
     String? terms_version,
   }) async {
-    if (terms_version != TermsAndConditions.version) return;
     if (terms_accepted_at == null || terms_accepted_at.isEmpty) return;
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_accepted_key, true);
     await prefs.setString(_version_key, TermsAndConditions.version);
     state = true;
+    if (terms_version != TermsAndConditions.version) {
+      try {
+        await ApiService.saveUserProfile({
+          'terms_accepted_at': terms_accepted_at,
+          'terms_version': TermsAndConditions.version,
+        });
+      } catch (_) {}
+    }
+  }
+
+  Future<void> clearLocal() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_accepted_key);
+    await prefs.remove(_version_key);
+    state = false;
   }
 }
 

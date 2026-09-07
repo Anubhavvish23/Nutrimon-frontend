@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../features/auth/providers/auth_provider.dart';
@@ -34,6 +33,7 @@ import 'router_refresh_notifier.dart';
 String? _resolve_redirect({
   required AuthStatus authState,
   required MealPreferencesState meal_prefs,
+  required bool cloud_loaded,
   required String location,
 }) {
   final is_loading = authState == AuthStatus.loading;
@@ -43,20 +43,23 @@ String? _resolve_redirect({
       location == '/forgot-password';
   final is_onboarding = location == '/onboarding';
   final is_splash = location == '/splash';
+  final is_bmi = location == '/bmi';
   final prefs_ready = meal_prefs.is_ready;
   final needs_onboarding =
-      is_authed && prefs_ready && !meal_prefs.has_completed_setup;
+      is_authed && prefs_ready && cloud_loaded && !meal_prefs.has_completed_setup;
 
   if (is_loading) return '/splash';
 
   if (is_splash) {
     if (!is_authed) return '/signup';
-    if (!prefs_ready) return null;
+    if (!prefs_ready || !cloud_loaded) return null;
     return needs_onboarding ? '/onboarding' : '/home';
   }
 
-  if (is_authed && !prefs_ready) return '/splash';
-  if (is_authed && needs_onboarding && !is_onboarding) return '/onboarding';
+  if (is_authed && (!prefs_ready || !cloud_loaded)) return '/splash';
+  if (is_authed && needs_onboarding && !is_onboarding && !is_bmi) {
+    return '/onboarding';
+  }
   if (is_authed && !needs_onboarding && is_onboarding) return '/home';
   if (is_authed && is_auth_route) {
     return needs_onboarding ? '/onboarding' : '/home';
@@ -86,6 +89,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       return _resolve_redirect(
         authState: ref.read(authProvider),
         meal_prefs: ref.read(mealPreferencesProvider),
+        cloud_loaded: ref.read(cloudProfileLoadedProvider),
         location: state.matchedLocation,
       );
     },

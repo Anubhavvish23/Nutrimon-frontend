@@ -543,7 +543,7 @@
             <span class="cta-meta">Direct APK · ~65 MB · Android 6.0+</span>
           </div>
           <div class="download-counter">
-            <span class="download-counter__badge" id="downloadCount">5</span>
+            <span class="download-counter__badge" id="downloadCount">—</span>
             <span>people have downloaded NutriMorning</span>
           </div>
         </div>
@@ -677,7 +677,7 @@
           </svg>
           Download for Android
         </button>
-        <p class="final-counter"><strong id="downloadCountFooter">5</strong> downloads so far</p>
+        <p class="final-counter"><strong id="downloadCountFooter">—</strong> downloads so far</p>
       </div>
     </div>
   </section>
@@ -696,35 +696,57 @@
 
   <script>
     (function () {
-      var STORAGE_KEY = 'nutrimorning_download_count';
-      var START_COUNT = 5;
+      var COUNTED_KEY = 'nutrimorning_download_counted';
+      var CACHE_KEY = 'nutrimorning_download_total';
+      var BASE_COUNT = 5;
       var APK_URL = 'downloads/nutrimorning.apk';
+      var COUNTER_URL =
+        'https://nutrimon-backend-production.up.railway.app/stats/downloads';
 
       var count_els = [
         document.getElementById('downloadCount'),
         document.getElementById('downloadCountFooter')
       ].filter(Boolean);
 
-      function read_count() {
+      var busy = false;
+
+      function format_count(value) {
+        return Number(value).toLocaleString('en-IN');
+      }
+
+      function cache_count(value) {
         try {
-          var stored = localStorage.getItem(STORAGE_KEY);
-          if (stored === null) return START_COUNT;
-          var parsed = parseInt(stored, 10);
-          return isNaN(parsed) ? START_COUNT : parsed;
+          localStorage.setItem(CACHE_KEY, String(value));
+        } catch (e) {}
+      }
+
+      function cached_count() {
+        try {
+          var stored = parseInt(localStorage.getItem(CACHE_KEY) || '', 10);
+          return isNaN(stored) ? BASE_COUNT : stored;
         } catch (e) {
-          return START_COUNT;
+          return BASE_COUNT;
         }
       }
 
-      function write_count(value) {
+      function already_counted() {
         try {
-          localStorage.setItem(STORAGE_KEY, String(value));
+          return localStorage.getItem(COUNTED_KEY) === '1';
+        } catch (e) {
+          return false;
+        }
+      }
+
+      function mark_counted() {
+        try {
+          localStorage.setItem(COUNTED_KEY, '1');
         } catch (e) {}
       }
 
       function render_count(value) {
+        var text = format_count(value);
         count_els.forEach(function (el) {
-          el.textContent = String(value);
+          el.textContent = text;
         });
       }
 
@@ -737,6 +759,55 @@
         }, 280);
       }
 
+      function parse_remote_count(data) {
+        if (!data || typeof data !== 'object') return null;
+        var parsed = parseInt(data.count, 10);
+        if (isNaN(parsed) || parsed < 0) return null;
+        return parsed;
+      }
+
+      function fetch_count(method) {
+        return fetch(COUNTER_URL, {
+          method: method,
+          cache: 'no-store'
+        })
+          .then(function (res) {
+            if (!res.ok) throw new Error('counter ' + res.status);
+            return res.json();
+          })
+          .then(parse_remote_count);
+      }
+
+      function load_count() {
+        fetch_count('GET')
+          .then(function (total) {
+            if (total == null) throw new Error('bad count');
+            cache_count(total);
+            render_count(total);
+          })
+          .catch(function () {
+            render_count(cached_count());
+          });
+      }
+
+      function count_this_download() {
+        if (already_counted()) {
+          return Promise.resolve(cached_count());
+        }
+        mark_counted();
+        return fetch_count('POST')
+          .then(function (total) {
+            if (total == null) throw new Error('bad bump');
+            cache_count(total);
+            return total;
+          })
+          .catch(function () {
+            var fallback = cached_count() + 1;
+            cache_count(fallback);
+            return fallback;
+          });
+      }
+
       function trigger_download() {
         var link = document.createElement('a');
         link.href = APK_URL;
@@ -747,18 +818,25 @@
       }
 
       function on_download_click() {
-        var next = read_count() + 1;
-        write_count(next);
-        render_count(next);
-        bump_animation();
+        if (busy) return;
+        busy = true;
         trigger_download();
+        count_this_download()
+          .then(function (total) {
+            render_count(total);
+            bump_animation();
+          })
+          .finally(function () {
+            busy = false;
+          });
       }
 
       document.querySelectorAll('.js-download').forEach(function (btn) {
         btn.addEventListener('click', on_download_click);
       });
 
-      render_count(read_count());
+      render_count(cached_count());
+      load_count();
     })();
   </script>
 </body>

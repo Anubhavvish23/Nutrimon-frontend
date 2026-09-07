@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../storage/user_storage.dart';
 import '../../features/health/providers/bmi_profile_provider.dart';
 import '../../features/health/providers/health_profile_provider.dart';
+import '../../features/health/providers/custom_symptom_history_provider.dart';
 import '../../features/health/providers/selected_symptoms_provider.dart';
 import '../../features/health/providers/symptom_analysis_provider.dart';
 import '../../features/health/providers/symptom_timeline_provider.dart';
@@ -129,6 +130,13 @@ Future<void> loadCloudUserProfile(
 
   final grocery_checked = _asStringList(profile['grocery_checked']);
   await read(groceryCheckedProvider.notifier).applyFromCloud(grocery_checked);
+
+  final custom_history = profile['custom_symptom_history'];
+  if (custom_history is List) {
+    await read(customSymptomHistoryProvider.notifier).applyFromCloud(
+      custom_history,
+    );
+  }
 
   await read(termsAcceptedProvider.notifier).applyFromCloud(
         terms_accepted_at: profile['terms_accepted_at']?.toString(),

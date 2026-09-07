@@ -95,7 +95,22 @@ class SymptomTimelineNotifier extends Notifier<SymptomTimelineState> {
           analysis.meal_suggestions.map((m) => m.name).take(3).toList(),
     );
 
-    final next = [entry, ...state.entries].take(40).toList();
+    final same_pending = state.entries.where((entry) {
+      if (!entry.is_pending) return false;
+      if (analysis.custom_text.trim().isNotEmpty) {
+        return entry.custom_text.trim().toLowerCase() ==
+            analysis.custom_text.trim().toLowerCase();
+      }
+      if (analysis.analyzed_slugs.isEmpty) return false;
+      final left = [...entry.symptom_slugs]..sort();
+      final right = [...analysis.analyzed_slugs]..sort();
+      return left.join('|') == right.join('|');
+    }).map((entry) => entry.id).toSet();
+
+    final kept = state.entries
+        .where((entry) => !same_pending.contains(entry.id))
+        .toList();
+    final next = [entry, ...kept].take(40).toList();
     state = SymptomTimelineState(entries: next, is_ready: true);
     await _persist();
   }

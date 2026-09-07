@@ -63,6 +63,25 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     context.go('/home');
   }
 
+  Future<void> _open_bmi_then_finish() async {
+    if (_diet_type == null ||
+        _selected_goals.isEmpty ||
+        _gender == null ||
+        _selected_activities.isEmpty) {
+      return;
+    }
+    await ref.read(mealPreferencesProvider.notifier).saveAll(
+          diet_type: _diet_type!,
+          meal_goals: _selected_goals,
+          gender: _gender!,
+          activities: _selected_activities,
+        );
+    if (!mounted) return;
+    await context.push('/bmi');
+    if (!mounted) return;
+    context.go('/home');
+  }
+
   void _toggleGoal(String goal_id) {
     setState(() {
       if (_selected_goals.contains(goal_id)) {
@@ -422,10 +441,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
           _primaryButton(
             label: 'Calculate BMI',
             enabled: true,
-            onTap: () async {
-              await context.push('/bmi');
-              if (mounted) await _finishOnboarding();
-            },
+            onTap: _open_bmi_then_finish,
           ),
           const SizedBox(height: 14),
           TextButton(
