@@ -38,7 +38,7 @@ Write-Host "Version: $version_name+$build_number"
 Write-Host "Update check: $UpdateSiteUrl/version.json"
 Write-Host ""
 
-& $flutter build apk --release `
+& $flutter build apk --release --target-platform android-arm64 `
     --dart-define="API_BASE_URL=$ApiBaseUrl" `
     --dart-define="UPDATE_CHECK_URL=$UpdateSiteUrl/version.json"
 
