@@ -19,7 +19,7 @@ class ApiService {
     if (host == '127.0.0.1' || host == 'localhost') {
       return 'Request timed out at $url. Run: adb reverse tcp:${ApiConfig.port} tcp:${ApiConfig.port} (phone USB), then hot restart. Backend must be running (air).';
     }
-    return 'Request timed out at $url. Campus/public Wi‑Fi often blocks phone→PC. Use launch config "NutriMorning (USB)" + adb reverse, or phone hotspot + update api_config.dart IP ($host). Backend must be running on port ${ApiConfig.port}.';
+    return 'Request timed out at $url. Campus/public Wi‑Fi often blocks phone→PC. Use launch config "NutriFit (USB)" + adb reverse, or phone hotspot + update api_config.dart IP ($host). Backend must be running on port ${ApiConfig.port}.';
   }
 
   static String _unreachableMessage(String url) {

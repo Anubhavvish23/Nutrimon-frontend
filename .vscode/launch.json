@@ -2,7 +2,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "NutriMorning",
+      "name": "NutriFit",
       "request": "launch",
       "type": "dart",
       "args": [
@@ -10,7 +10,7 @@
       ]
     },
     {
-      "name": "NutriMorning (with Google)",
+      "name": "NutriFit (with Google)",
       "request": "launch",
       "type": "dart",
       "args": [
@@ -19,7 +19,7 @@
       ]
     },
     {
-      "name": "NutriMorning (USB)",
+      "name": "NutriFit (USB)",
       "request": "launch",
       "type": "dart",
       "args": [
@@ -28,7 +28,7 @@
       ]
     },
     {
-      "name": "NutriMorning (Android emulator)",
+      "name": "NutriFit (Android emulator)",
       "request": "launch",
       "type": "dart",
       "args": [
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "name": "NutriMorning (Production)",
+      "name": "NutriFit (Production)",
       "request": "launch",
       "type": "dart",
       "args": [

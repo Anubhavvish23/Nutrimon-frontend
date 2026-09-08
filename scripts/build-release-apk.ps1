@@ -1,7 +1,7 @@
 param(
     [string]$ApiBaseUrl = "https://nutrimon-backend-production.up.railway.app",
     [string]$UpdateSiteUrl = "https://nutrimon-frontend.vercel.app",
-    [string]$ReleaseMessage = "BMI calculator flow, no fake 22.4 default, Plans BMI prompt, extra symptoms, and terms loading."
+    [string]$ReleaseMessage = "Now called NutriFit. Same app, new name."
 )
 
 $ErrorActionPreference = "Stop"
@@ -41,6 +41,10 @@ Write-Host ""
 & $flutter build apk --release `
     --dart-define="API_BASE_URL=$ApiBaseUrl" `
     --dart-define="UPDATE_CHECK_URL=$UpdateSiteUrl/version.json"
+
+if ($LASTEXITCODE -ne 0) {
+    throw "Flutter APK build failed with exit code $LASTEXITCODE"
+}
 
 $apk_source = Join-Path $root "build\app\outputs\flutter-apk\app-release.apk"
 $downloads_dir = Join-Path $root "website\downloads"

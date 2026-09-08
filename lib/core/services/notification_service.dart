@@ -24,7 +24,7 @@ class NotificationService {
 
   static const AndroidNotificationChannel _channel = AndroidNotificationChannel(
     'nutrimorning_channel',
-    'NutriMorning Notifications',
+    'NutriFit Notifications',
     description: 'Health and breakfast reminders',
     importance: Importance.high,
   );
@@ -281,7 +281,7 @@ class NotificationService {
     await _local_notifications.show(
       999,
       'Notifications are on',
-      'You will get NutriMorning meal reminders through the day.',
+      'You will get NutriFit meal reminders through the day.',
       _notification_details(),
     );
   }

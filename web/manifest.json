@@ -1,6 +1,6 @@
 {
-    "name": "NutriMorning",
-    "short_name": "NutriMorning",
+    "name": "NutriFit",
+    "short_name": "NutriFit",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

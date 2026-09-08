@@ -1,7 +1,7 @@
 import '../../../core/config/app_brand.dart';
 
 class TermsAndConditions {
-  static const version = '1.0';
+  static const version = '1.1';
 
   static const last_updated = 'September 2026';
 
@@ -11,9 +11,9 @@ class TermsAndConditions {
 
   static const sections = <TermsSection>[
     TermsSection(
-      title: '1. About NutriMorning',
+      title: '1. About NutriFit',
       body:
-          'NutriMorning is a wellness and meal-planning application. It helps you explore recipes, '
+          'NutriFit is a wellness and meal-planning application. It helps you explore recipes, '
           'track habits, and receive personalized suggestions. It is not a licensed medical, '
           'dietetic, or healthcare service.',
     ),
@@ -40,7 +40,7 @@ class TermsAndConditions {
       title: '4. Your Responsibility',
       body:
           'You are responsible for the information you provide, how you use the app, and any '
-          'decisions you make based on its content. You agree not to use NutriMorning as a '
+          'decisions you make based on its content. You agree not to use NutriFit as a '
           'substitute for professional care or emergency services. In a medical emergency, '
           'contact local emergency services immediately.',
     ),
@@ -62,7 +62,7 @@ class TermsAndConditions {
     TermsSection(
       title: '7. Limitation of Liability',
       body:
-          'To the fullest extent permitted by law, NutriMorning and its operators are not liable for '
+          'To the fullest extent permitted by law, NutriFit and its operators are not liable for '
           'any injury, illness, allergic reaction, nutritional harm, data loss, or other damages '
           'arising from your use of the app or reliance on AI-generated content. The app is provided '
           '"as is" without warranties of accuracy, fitness for a particular purpose, or uninterrupted '

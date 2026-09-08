@@ -18,7 +18,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   assert(() {
-    debugPrint('NutriMorning API: ${ApiConfig.baseUrl}');
+    debugPrint('NutriFit API: ${ApiConfig.baseUrl}');
     return true;
   }());
 
@@ -29,19 +29,19 @@ Future<void> main() async {
 
   runApp(
     const ProviderScope(
-      child: NutriMorningApp(),
+      child: NutriFitApp(),
     ),
   );
 }
 
-class NutriMorningApp extends ConsumerStatefulWidget {
-  const NutriMorningApp({super.key});
+class NutriFitApp extends ConsumerStatefulWidget {
+  const NutriFitApp({super.key});
 
   @override
-  ConsumerState<NutriMorningApp> createState() => _NutriMorningAppState();
+  ConsumerState<NutriFitApp> createState() => _NutriFitAppState();
 }
 
-class _NutriMorningAppState extends ConsumerState<NutriMorningApp>
+class _NutriFitAppState extends ConsumerState<NutriFitApp>
     with WidgetsBindingObserver {
   @override
   void initState() {

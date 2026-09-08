@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>NutriMorning — Fuel Your Morning</title>
-  <meta name="description" content="Personalized meal plans and health tracking for your mornings. Download the NutriMorning Android app." />
+  <title>NutriFit — Eat well, feel better</title>
+  <meta name="description" content="Personalized meal plans and health tracking. Download the NutriFit Android app." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
@@ -207,17 +207,31 @@
       align-items: center;
       gap: 12px;
       padding: 10px 16px;
-      border-radius: 12px;
+      border-radius: 999px;
       background: var(--panel);
       border: 1px solid var(--line);
       font-size: 13px;
       color: var(--text-soft);
     }
+    .download-counter__live {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 0 0 rgba(63, 220, 138, 0.55);
+      animation: live-pulse 1.6s ease-out infinite;
+      flex-shrink: 0;
+    }
+    @keyframes live-pulse {
+      0% { box-shadow: 0 0 0 0 rgba(63, 220, 138, 0.55); }
+      70% { box-shadow: 0 0 0 10px rgba(63, 220, 138, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(63, 220, 138, 0); }
+    }
     .download-counter__badge {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: 36px;
+      min-width: 44px;
       height: 36px;
       padding: 0 10px;
       border-radius: 10px;
@@ -231,8 +245,20 @@
       transition: transform 0.25s ease, color 0.25s ease;
     }
     .download-counter__badge.bump {
-      transform: scale(1.12);
+      transform: scale(1.16);
       color: #fff;
+    }
+    .download-counter__plus {
+      display: inline-block;
+      margin-left: 2px;
+      color: var(--green);
+      font-weight: 700;
+      animation: plus-pop 0.45s ease;
+    }
+    @keyframes plus-pop {
+      0% { transform: translateY(6px) scale(0.6); opacity: 0; }
+      40% { transform: translateY(-2px) scale(1.2); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
     }
 
     .hero-visual {
@@ -508,15 +534,15 @@
     <div class="container">
       <nav>
         <a class="brand" href="#">
-          <img src="icon.png" alt="NutriMorning" />
-          <span>NutriMorning</span>
+          <img src="icon.png" alt="NutriFit" />
+          <span>NutriFit</span>
         </a>
         <div class="nav-links">
           <a href="#features">Features</a>
           <a href="#details">Details</a>
           <a href="#download">Download</a>
         </div>
-        <button type="button" class="btn-download js-download" aria-label="Download NutriMorning APK">
+        <button type="button" class="btn-download js-download" aria-label="Download NutriFit APK">
           Get the app
         </button>
       </nav>
@@ -543,15 +569,16 @@
             <span class="cta-meta">Direct APK · ~65 MB · Android 6.0+</span>
           </div>
           <div class="download-counter">
-            <span class="download-counter__badge" id="downloadCount">—</span>
-            <span>people have downloaded NutriMorning</span>
+            <span class="download-counter__live" aria-hidden="true"></span>
+            <span class="download-counter__badge" id="downloadCount">12+</span>
+            <span>active users</span>
           </div>
         </div>
         <div class="hero-visual">
           <div class="phone-frame">
             <div class="phone-ring" aria-hidden="true"></div>
             <div class="phone-screen">
-              <img src="icon.png" alt="NutriMorning app logo" />
+              <img src="icon.png" alt="NutriFit app logo" />
             </div>
           </div>
         </div>
@@ -581,9 +608,9 @@
   <section class="section" id="features">
     <div class="container">
       <div class="section-head">
-        <div class="section-tag">Why NutriMorning</div>
+        <div class="section-tag">Why NutriFit</div>
         <h2>Nutrition that works with your schedule, not against it.</h2>
-        <p class="section-sub">Most apps ask you to plan a perfect day. NutriMorning starts from the fifteen minutes you actually have before you're out the door.</p>
+        <p class="section-sub">Most apps ask you to plan a perfect day. NutriFit starts from the fifteen minutes you actually have before you're out the door.</p>
       </div>
       <div class="feature-grid">
         <div class="feature-cell">
@@ -677,7 +704,7 @@
           </svg>
           Download for Android
         </button>
-        <p class="final-counter"><strong id="downloadCountFooter">—</strong> downloads so far</p>
+        <p class="final-counter"><strong id="downloadCountFooter">12+</strong> active users</p>
       </div>
     </div>
   </section>
@@ -687,7 +714,7 @@
       <div class="footer-row">
         <div class="footer-brand">
           <img src="icon.png" alt="" />
-          <span>© NutriMorning</span>
+          <span>© NutriFit</span>
         </div>
         <a href="mailto:support@nutrimorning.com">support@nutrimorning.com</a>
       </div>
@@ -696,9 +723,8 @@
 
   <script>
     (function () {
-      var COUNTED_KEY = 'nutrimorning_download_counted';
       var CACHE_KEY = 'nutrimorning_download_total';
-      var BASE_COUNT = 5;
+      var BASE_COUNT = 12;
       var APK_URL = 'downloads/nutrimorning.apk';
       var COUNTER_URL =
         'https://nutrimon-backend-production.up.railway.app/stats/downloads';
@@ -709,61 +735,90 @@
       ].filter(Boolean);
 
       var busy = false;
+      var shown_count = BASE_COUNT;
+      var tick_timer = null;
+
+      function floor_count(value) {
+        return Math.max(BASE_COUNT, Number(value) || BASE_COUNT);
+      }
 
       function format_count(value) {
-        return Number(value).toLocaleString('en-IN');
+        return floor_count(value).toLocaleString('en-IN') + '+';
       }
 
       function cache_count(value) {
         try {
-          localStorage.setItem(CACHE_KEY, String(value));
+          localStorage.setItem(CACHE_KEY, String(floor_count(value)));
         } catch (e) {}
       }
 
       function cached_count() {
         try {
           var stored = parseInt(localStorage.getItem(CACHE_KEY) || '', 10);
-          return isNaN(stored) ? BASE_COUNT : stored;
+          return floor_count(isNaN(stored) ? BASE_COUNT : stored);
         } catch (e) {
           return BASE_COUNT;
         }
       }
 
-      function already_counted() {
-        try {
-          return localStorage.getItem(COUNTED_KEY) === '1';
-        } catch (e) {
-          return false;
-        }
-      }
-
-      function mark_counted() {
-        try {
-          localStorage.setItem(COUNTED_KEY, '1');
-        } catch (e) {}
-      }
-
-      function render_count(value) {
-        var text = format_count(value);
+      function render_count(value, animate_plus) {
+        shown_count = floor_count(value);
+        var text = format_count(shown_count);
         count_els.forEach(function (el) {
           el.textContent = text;
         });
+        var badge = document.getElementById('downloadCount');
+        if (!badge) return;
+        var plus = badge.querySelector('.download-counter__plus');
+        if (plus) plus.remove();
+        if (animate_plus) {
+          var mark = document.createElement('span');
+          mark.className = 'download-counter__plus';
+          mark.textContent = '+';
+          badge.appendChild(mark);
+          setTimeout(function () {
+            if (mark.parentNode) mark.parentNode.removeChild(mark);
+            badge.textContent = text;
+          }, 450);
+        }
       }
 
       function bump_animation() {
         var badge = document.getElementById('downloadCount');
         if (!badge) return;
+        badge.classList.remove('bump');
+        void badge.offsetWidth;
         badge.classList.add('bump');
         setTimeout(function () {
           badge.classList.remove('bump');
         }, 280);
       }
 
+      function animate_count(from, to) {
+        var start = floor_count(from);
+        var end = floor_count(to);
+        if (tick_timer) clearInterval(tick_timer);
+        if (end <= start) {
+          render_count(end, false);
+          return;
+        }
+        var current = start;
+        tick_timer = setInterval(function () {
+          current += 1;
+          render_count(current, current === end);
+          if (current >= end) {
+            clearInterval(tick_timer);
+            tick_timer = null;
+            bump_animation();
+          }
+        }, 80);
+      }
+
       function parse_remote_count(data) {
         if (!data || typeof data !== 'object') return null;
         var parsed = parseInt(data.count, 10);
         if (isNaN(parsed) || parsed < 0) return null;
-        return parsed;
+        return floor_count(parsed);
       }
 
       function fetch_count(method) {
@@ -783,18 +838,14 @@
           .then(function (total) {
             if (total == null) throw new Error('bad count');
             cache_count(total);
-            render_count(total);
+            render_count(total, false);
           })
           .catch(function () {
-            render_count(cached_count());
+            render_count(cached_count(), false);
           });
       }
 
       function count_this_download() {
-        if (already_counted()) {
-          return Promise.resolve(cached_count());
-        }
-        mark_counted();
         return fetch_count('POST')
           .then(function (total) {
             if (total == null) throw new Error('bad bump');
@@ -821,10 +872,10 @@
         if (busy) return;
         busy = true;
         trigger_download();
+        var from = shown_count;
         count_this_download()
           .then(function (total) {
-            render_count(total);
-            bump_animation();
+            animate_count(from, total);
           })
           .finally(function () {
             busy = false;
@@ -835,7 +886,7 @@
         btn.addEventListener('click', on_download_click);
       });
 
-      render_count(cached_count());
+      render_count(cached_count(), false);
       load_count();
     })();
   </script>

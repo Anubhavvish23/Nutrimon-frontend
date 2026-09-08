@@ -56,7 +56,7 @@ class _PostLoginTermsDialogState extends State<_PostLoginTermsDialog> {
         ),
         content: SingleChildScrollView(
           child: Text(
-            'Please read and accept our Terms & Conditions to use NutriMorning. '
+            'Please read and accept our Terms & Conditions to use NutriFit. '
             'AI recommendations are not medical advice and may be inaccurate.',
             style: TextStyle(color: app.text_muted, height: 1.45),
           ),

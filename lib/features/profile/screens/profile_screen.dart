@@ -297,7 +297,7 @@ class _ProfileContent extends ConsumerWidget {
                       final uri = Uri(
                         scheme: 'mailto',
                         path: AppBrand.support_email,
-                        query: 'subject=NutriMorning support',
+                        query: 'subject=NutriFit support',
                       );
                       if (await canLaunchUrl(uri)) {
                         await launchUrl(uri);

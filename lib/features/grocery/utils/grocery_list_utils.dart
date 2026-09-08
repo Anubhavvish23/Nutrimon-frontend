@@ -75,7 +75,7 @@ List<GroceryItem> build_grocery_list(List<Recipe> recipes) {
 }
 
 String grocery_list_text(List<GroceryItem> items) {
-  final lines = <String>['NutriMorning Grocery List', ''];
+  final lines = <String>['NutriFit Grocery List', ''];
   for (final item in items) {
     final prefix = item.checked ? '[x]' : '[ ]';
     lines.add('$prefix ${item.label}');

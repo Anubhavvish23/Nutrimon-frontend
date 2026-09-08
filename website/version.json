@@ -1,7 +1,7 @@
 ﻿{
-    "build_number":  5,
-    "message":  "BMI calculator flow, no fake 22.4 default, Plans BMI prompt, extra symptoms, and terms loading.",
-    "apk_url":  "downloads/nutrimorning.apk",
-    "force_update":  false,
-    "latest_version":  "1.0.4"
+    "latest_version": "1.0.4",
+    "build_number": 4,
+    "apk_url": "downloads/nutrimorning.apk",
+    "message": "BMI calculator flow, no fake 22.4 default, Plans BMI prompt, extra symptoms, and terms loading.",
+    "force_update": false
 }
