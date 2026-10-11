@@ -41,7 +41,7 @@
       "request": "launch",
       "type": "dart",
       "args": [
-        "--dart-define=API_BASE_URL=https://nutrimon-backend-production.up.railway.app"
+        "--dart-define=API_BASE_URL=https://nutrimorning-api-production.up.railway.app"
       ]
     }
   ]

@@ -1,7 +1,7 @@
 param(
-    [string]$ApiBaseUrl = "https://nutrimon-backend-production.up.railway.app",
+    [string]$ApiBaseUrl = "https://nutrimorning-api-production.up.railway.app",
     [string]$UpdateSiteUrl = "https://nutrimon-frontend.vercel.app",
-    [string]$ReleaseMessage = "Now called NutriFit. Same app, new name."
+    [string]$ReleaseMessage = "Connects to the new NutriFit API host."
 )
 
 $ErrorActionPreference = "Stop"

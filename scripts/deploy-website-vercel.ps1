@@ -1,5 +1,5 @@
 param(
-    [string]$ApiBaseUrl = "https://nutrimon-backend-production.up.railway.app"
+    [string]$ApiBaseUrl = "https://nutrimorning-api-production.up.railway.app"
 )
 
 $ErrorActionPreference = "Stop"
