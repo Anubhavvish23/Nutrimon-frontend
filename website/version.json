@@ -1,7 +1,7 @@
 ﻿{
-    "build_number":  6,
-    "message":  "Now called NutriFit. Same app, new name.",
+    "build_number":  7,
+    "message":  "Connects to the new NutriFit API host.",
     "apk_url":  "downloads/nutrimorning.apk",
     "force_update":  false,
-    "latest_version":  "1.0.5"
+    "latest_version":  "1.0.6"
 }
